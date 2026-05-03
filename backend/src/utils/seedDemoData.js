@@ -166,7 +166,14 @@ async function run() {
   process.exit(0);
 }
 
-run().catch((error) => {
-  console.error("No se pudieron cargar los datos demo:", error);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((error) => {
+    console.error("No se pudieron cargar los datos demo:", error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  upsertTeams,
+  upsertMatches
+};

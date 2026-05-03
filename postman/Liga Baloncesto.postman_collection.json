@@ -275,7 +275,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"coachName\": \"Julieta Romero Actualizada\"\n}"
+              "raw": "{\n  \"coachName\": \"Julieta Romero Diaz\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/teams/{{teamId}}",
@@ -402,6 +402,28 @@
                 "matches",
                 "{{matchId}}",
                 "result"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Partido",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}"
               ]
             }
           }

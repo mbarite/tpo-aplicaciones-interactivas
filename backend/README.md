@@ -43,15 +43,17 @@ Para sembrar equipos, jugadores, partidos y resultados:
 npm run seed:demo
 ```
 
+Para volver a dejar la base en su estado inicial de demo:
+
+```bash
+npm run seed:reset-demo
+```
+
 ## Demo con Postman
 
 Hay una coleccion lista para importar en:
 
-- [Liga Baloncesto.postman_collection.json](/C:/Users/matyb/OneDrive/Documents/Mati/Facultad/Materias/2026/1er Cuatrimestre 2026/Aplicaciones interactivas/TPO/postman/Liga Baloncesto.postman_collection.json)
-
-Y una guia de uso en:
-
-- [POSTMAN_DEMO.md](/C:/Users/matyb/OneDrive/Documents/Mati/Facultad/Materias/2026/1er Cuatrimestre 2026/Aplicaciones interactivas/TPO/POSTMAN_DEMO.md)
+- `postman/Liga Baloncesto.postman_collection.json`
 
 ## Endpoints principales
 

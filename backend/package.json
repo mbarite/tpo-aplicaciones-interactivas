@@ -7,7 +7,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:admin": "node src/utils/seedAdmin.js",
-    "seed:demo": "node src/utils/seedDemoData.js"
+    "seed:demo": "node src/utils/seedDemoData.js",
+    "seed:reset-demo": "node src/utils/resetDemoData.js"
   },
   "keywords": [
     "nodejs",
