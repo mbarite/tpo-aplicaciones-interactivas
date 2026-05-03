@@ -1,0 +1,81 @@
+@baseUrl = http://localhost:4000/api
+@token = PEGAR_TOKEN_ACA
+@teamId = PEGAR_TEAM_ID
+@awayTeamId = PEGAR_OTRO_TEAM_ID
+@matchId = PEGAR_MATCH_ID
+
+### Healthcheck
+GET {{baseUrl}}/health
+
+### Login admin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin1234"
+}
+
+### Ver perfil autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Ver clasificacion
+GET {{baseUrl}}/standings
+
+### Ver equipos
+GET {{baseUrl}}/teams
+
+### Ver detalle de un equipo
+GET {{baseUrl}}/teams/{{teamId}}
+
+### Ver calendario de partidos
+GET {{baseUrl}}/matches/calendar
+
+### Ver resultados
+GET {{baseUrl}}/matches/results
+
+### Crear equipo
+POST {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Panteras del Este",
+  "coachName": "Julieta Romero"
+}
+
+### Crear jugador
+POST {{baseUrl}}/players
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Nicolas",
+  "lastName": "Dominguez",
+  "category": "U17",
+  "teamId": "{{teamId}}"
+}
+
+### Crear partido
+POST {{baseUrl}}/matches
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "homeTeamId": "{{teamId}}",
+  "awayTeamId": "{{awayTeamId}}",
+  "date": "2026-05-10",
+  "time": "20:30",
+  "venue": "Club Central"
+}
+
+### Cargar resultado
+PATCH {{baseUrl}}/matches/{{matchId}}/result
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "homeScore": 81,
+  "awayScore": 77
+}
