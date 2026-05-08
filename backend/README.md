@@ -49,6 +49,18 @@ Para volver a dejar la base en su estado inicial de demo:
 npm run seed:reset-demo
 ```
 
+## Pruebas
+
+Para ejecutar la suite automatica:
+
+```bash
+npm test
+```
+
+Hay una guia adicional en:
+
+- `TESTING.md`
+
 ## Demo con Postman
 
 Hay una coleccion lista para importar en:
