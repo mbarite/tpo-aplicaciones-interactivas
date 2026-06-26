@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { LEAGUE } from "../config";
 import { useAsync } from "../hooks/useAsync";
+import { useLeague } from "../context/LeagueContext";
 import { getStandings } from "../services/standingService";
 import { getCalendar } from "../services/matchService";
 
@@ -43,8 +44,15 @@ const QUICK_LINKS = [
 ];
 
 export default function HomePage() {
-  const standings = useAsync(getStandings, []);
-  const calendar = useAsync(getCalendar, []);
+  const { seasonId, category } = useLeague();
+  const standings = useAsync(
+    () => getStandings(seasonId, category),
+    [seasonId, category]
+  );
+  const calendar = useAsync(
+    () => getCalendar(seasonId, category),
+    [seasonId, category]
+  );
 
   const topStandings = (standings.data || []).slice(0, 5);
   const nextMatches = (calendar.data || []).slice(0, 3);

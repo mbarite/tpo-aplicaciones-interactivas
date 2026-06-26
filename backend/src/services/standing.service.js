@@ -1,6 +1,7 @@
 const Match = require("../models/match.model");
 const Team = require("../models/team.model");
 const Player = require("../models/player.model");
+const Season = require("../models/season.model");
 const httpError = require("../utils/httpError");
 const serializeMatch = require("../utils/serializeMatch");
 
@@ -9,6 +10,7 @@ function emptyStats(team) {
     teamId: team._id.toString(),
     team: team.name,
     coachName: team.coachName,
+    logoUrl: team.logoUrl || "",
     points: 0,
     played: 0,
     won: 0,
@@ -57,17 +59,32 @@ function applyMatch(statsByTeamId, match) {
   away.pointDifference = away.pointsFor - away.pointsAgainst;
 }
 
-async function getStandings() {
-  const [teams, matches] = await Promise.all([
-    Team.find().sort({ name: 1 }).lean(),
-    Match.find({ status: "played" }).lean()
-  ]);
+async function getStandings(seasonId, category) {
+  // Filtro del torneo: temporada + categoria (cada combinacion es una tabla propia).
+  const baseFilter = {};
+  if (seasonId) baseFilter.season = seasonId;
+  if (category) baseFilter.category = category;
+
+  const allMatches = await Match.find(baseFilter).lean();
+
+  // Solo participan en la tabla los equipos que tienen partidos en ese torneo.
+  const participatingIds = new Set();
+  allMatches.forEach((match) => {
+    participatingIds.add(match.homeTeam.toString());
+    participatingIds.add(match.awayTeam.toString());
+  });
+
+  const teams = await Team.find({ _id: { $in: [...participatingIds] } })
+    .sort({ name: 1 })
+    .lean();
 
   const statsByTeamId = new Map(
     teams.map((team) => [team._id.toString(), emptyStats(team)])
   );
 
-  matches.forEach((match) => applyMatch(statsByTeamId, match));
+  allMatches
+    .filter((match) => match.status === "played")
+    .forEach((match) => applyMatch(statsByTeamId, match));
 
   return Array.from(statsByTeamId.values())
     .sort((a, b) => {
@@ -91,24 +108,48 @@ async function getStandings() {
     }));
 }
 
-async function getTeamDetail(teamId) {
+async function getTeamDetail(teamId, seasonId, category) {
   const team = await Team.findById(teamId).lean();
 
   if (!team) {
     throw httpError(404, "Equipo no encontrado.");
   }
 
+  const playerFilter = { team: teamId };
+  if (category) {
+    playerFilter.category = category;
+  }
+
+  const matchFilter = { $or: [{ homeTeam: teamId }, { awayTeam: teamId }] };
+  if (seasonId) {
+    matchFilter.season = seasonId;
+  }
+  if (category) {
+    matchFilter.category = category;
+  }
+
   const [players, matches, standings] = await Promise.all([
-    Player.find({ team: teamId }).sort({ lastName: 1, firstName: 1 }).lean(),
-    Match.find({
-      $or: [{ homeTeam: teamId }, { awayTeam: teamId }]
-    })
+    Player.find(playerFilter).sort({ lastName: 1, firstName: 1 }).lean(),
+    Match.find(matchFilter)
       .populate("homeTeam", "name")
       .populate("awayTeam", "name")
       .sort({ date: 1, time: 1 })
       .lean(),
-    getStandings()
+    getStandings(seasonId, category)
   ]);
+
+  // Puntos por jugador, sumados a partir de las estadisticas de los partidos jugados.
+  const pointsByPlayerId = {};
+  matches
+    .filter((match) => match.status === "played")
+    .forEach((match) => {
+      const isHome = match.homeTeam._id.toString() === teamId.toString();
+      const stats = isHome ? match.homePlayerStats : match.awayPlayerStats;
+      (stats || []).forEach((stat) => {
+        const key = stat.player.toString();
+        pointsByPlayerId[key] = (pointsByPlayerId[key] || 0) + (stat.points || 0);
+      });
+    });
 
   const currentStanding =
     standings.find((item) => item.teamId === teamId.toString()) || {
@@ -120,14 +161,18 @@ async function getTeamDetail(teamId) {
     id: team._id.toString(),
     name: team.name,
     coachName: team.coachName,
+    logoUrl: team.logoUrl || "",
     standings: currentStanding,
-    players: players.map((player) => ({
-      id: player._id.toString(),
-      firstName: player.firstName,
-      lastName: player.lastName,
-      fullName: `${player.firstName} ${player.lastName}`,
-      category: player.category
-    })),
+    players: players
+      .map((player) => ({
+        id: player._id.toString(),
+        firstName: player.firstName,
+        lastName: player.lastName,
+        fullName: `${player.firstName} ${player.lastName}`,
+        category: player.category,
+        points: pointsByPlayerId[player._id.toString()] || 0
+      }))
+      .sort((a, b) => b.points - a.points || a.fullName.localeCompare(b.fullName)),
     playedMatches: matches
       .filter((match) => match.status === "played")
       .map(serializeMatch),
@@ -137,7 +182,62 @@ async function getTeamDetail(teamId) {
   };
 }
 
+// Campeones / palmares: por cada temporada y categoria con partidos jugados,
+// el equipo que quedo 1ro. Ademas, el conteo de titulos por equipo.
+async function getChampions() {
+  const seasons = await Season.find().sort({ year: -1 }).lean();
+  const champions = [];
+
+  for (const season of seasons) {
+    const categories = await Match.distinct("category", {
+      season: season._id,
+      status: "played"
+    });
+
+    for (const category of categories) {
+      const standings = await getStandings(season._id.toString(), category);
+      const top = standings.find((row) => row.position === 1 && row.played > 0);
+
+      if (top) {
+        champions.push({
+          seasonId: season._id.toString(),
+          season: season.name,
+          year: season.year,
+          seasonActive: season.isActive,
+          category,
+          teamId: top.teamId,
+          team: top.team,
+          logoUrl: top.logoUrl,
+          points: top.points
+        });
+      }
+    }
+  }
+
+  const titlesByTeam = {};
+  champions
+    .filter((item) => !item.seasonActive) // solo temporadas cerradas cuentan como titulo
+    .forEach((item) => {
+      if (!titlesByTeam[item.teamId]) {
+        titlesByTeam[item.teamId] = {
+          teamId: item.teamId,
+          team: item.team,
+          logoUrl: item.logoUrl,
+          titles: 0
+        };
+      }
+      titlesByTeam[item.teamId].titles += 1;
+    });
+
+  const palmares = Object.values(titlesByTeam).sort(
+    (a, b) => b.titles - a.titles || a.team.localeCompare(b.team)
+  );
+
+  return { champions, palmares };
+}
+
 module.exports = {
   getStandings,
-  getTeamDetail
+  getTeamDetail,
+  getChampions
 };

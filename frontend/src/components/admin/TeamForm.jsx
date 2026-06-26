@@ -2,11 +2,13 @@ import { useState } from "react";
 
 import Field from "../ui/Field";
 import Alert from "../ui/Alert";
+import TeamLogo from "../TeamLogo";
 import { required, collectErrors } from "../../utils/validation";
 
 export default function TeamForm({ initial, onSubmit, onCancel, submitting, submitError }) {
   const [name, setName] = useState(initial?.name || "");
   const [coachName, setCoachName] = useState(initial?.coachName || "");
+  const [logoUrl, setLogoUrl] = useState(initial?.logoUrl || "");
   const [errors, setErrors] = useState({});
 
   const handleSubmit = (event) => {
@@ -18,7 +20,11 @@ export default function TeamForm({ initial, onSubmit, onCancel, submitting, subm
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    onSubmit({ name: name.trim(), coachName: coachName.trim() });
+    onSubmit({
+      name: name.trim(),
+      coachName: coachName.trim(),
+      logoUrl: logoUrl.trim()
+    });
   };
 
   return (
@@ -42,6 +48,22 @@ export default function TeamForm({ initial, onSubmit, onCancel, submitting, subm
           onChange={(event) => setCoachName(event.target.value)}
           placeholder="Ej: Mariana Gomez"
         />
+      </Field>
+
+      <Field
+        label="Escudo / foto del equipo"
+        htmlFor="team-logo"
+        hint="Pega la URL de una imagen (opcional). Si la dejas vacia se usan las iniciales."
+      >
+        <div className="logo-field">
+          <TeamLogo team={{ name, logoUrl }} size={48} />
+          <input
+            id="team-logo"
+            value={logoUrl}
+            onChange={(event) => setLogoUrl(event.target.value)}
+            placeholder="https://.../escudo.png"
+          />
+        </div>
       </Field>
 
       <div className="form-actions">

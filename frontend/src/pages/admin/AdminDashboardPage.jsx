@@ -5,14 +5,18 @@ import { useAsync } from "../../hooks/useAsync";
 import { getTeams } from "../../services/teamService";
 import { getPlayers } from "../../services/playerService";
 import { getMatches } from "../../services/matchService";
+import { getSeasons } from "../../services/seasonService";
+import { getCategories } from "../../services/categoryService";
 
 import Loading from "../../components/ui/Loading";
 import Alert from "../../components/ui/Alert";
 
 const MANAGE_LINKS = [
-  { to: "/admin/equipos", icon: "🛡️", title: "Gestionar equipos", text: "Alta, edicion y baja de clubes." },
-  { to: "/admin/jugadores", icon: "🏃", title: "Gestionar jugadores", text: "Plantel de cada equipo por categoria." },
-  { to: "/admin/partidos", icon: "🏀", title: "Gestionar partidos", text: "Programar encuentros y cargar resultados." }
+  { to: "/admin/temporadas", icon: "📅", title: "Temporadas", text: "Crear años y elegir la temporada activa." },
+  { to: "/admin/categorias", icon: "🏷️", title: "Categorías", text: "Torneos por categoria (U13, U15, U17...)." },
+  { to: "/admin/equipos", icon: "🛡️", title: "Equipos", text: "Alta, edicion, escudo y plantel de cada club." },
+  { to: "/admin/jugadores", icon: "🏃", title: "Jugadores", text: "Plantel de cada equipo por categoria." },
+  { to: "/admin/partidos", icon: "🏀", title: "Partidos", text: "Programar encuentros y cargar resultados." }
 ];
 
 export default function AdminDashboardPage() {
@@ -20,19 +24,29 @@ export default function AdminDashboardPage() {
   const teams = useAsync(getTeams, []);
   const players = useAsync(getPlayers, []);
   const matches = useAsync(() => getMatches(), []);
+  const seasons = useAsync(getSeasons, []);
+  const categories = useAsync(getCategories, []);
 
-  const loading = teams.loading || players.loading || matches.loading;
-  const error = teams.error || players.error || matches.error;
+  const loading =
+    teams.loading ||
+    players.loading ||
+    matches.loading ||
+    seasons.loading ||
+    categories.loading;
+  const error =
+    teams.error || players.error || matches.error || seasons.error || categories.error;
 
   const allMatches = matches.data || [];
   const playedCount = allMatches.filter((match) => match.status === "played").length;
   const scheduledCount = allMatches.filter((match) => match.status === "scheduled").length;
 
   const metrics = [
+    { icon: "📅", label: "Temporadas", value: seasons.data?.length ?? 0 },
+    { icon: "🏷️", label: "Categorías", value: categories.data?.length ?? 0 },
     { icon: "🛡️", label: "Equipos", value: teams.data?.length ?? 0 },
     { icon: "🏃", label: "Jugadores", value: players.data?.length ?? 0 },
-    { icon: "📅", label: "Partidos programados", value: scheduledCount },
-    { icon: "📊", label: "Partidos jugados", value: playedCount }
+    { icon: "📊", label: "Partidos jugados", value: playedCount },
+    { icon: "🗓️", label: "Partidos programados", value: scheduledCount }
   ];
 
   return (

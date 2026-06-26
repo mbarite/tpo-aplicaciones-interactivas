@@ -10,6 +10,8 @@ import {
 } from "../../services/teamService";
 
 import TeamForm from "../../components/admin/TeamForm";
+import TeamRosterModal from "../../components/admin/TeamRosterModal";
+import TeamLogo from "../../components/TeamLogo";
 import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import Loading from "../../components/ui/Loading";
@@ -20,6 +22,7 @@ export default function AdminTeamsPage() {
   const { data: teams, loading, error, reload } = useAsync(getTeams, []);
   const [modal, setModal] = useState(null); // { mode, team }
   const [confirm, setConfirm] = useState(null); // team a eliminar
+  const [roster, setRoster] = useState(null); // team cuyo plantel se gestiona
   const save = useMutation();
   const remove = useMutation();
 
@@ -87,16 +90,28 @@ export default function AdminTeamsPage() {
               <tr>
                 <th>Equipo</th>
                 <th>Entrenador/a</th>
-                <th>Jugadores</th>
+                <th>Plantel</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {teams.map((team) => (
                 <tr key={team.id}>
-                  <td className="cell-strong">{team.name}</td>
+                  <td>
+                    <span className="cell-team">
+                      <TeamLogo team={team} size={30} round />
+                      {team.name}
+                    </span>
+                  </td>
                   <td>{team.coachName}</td>
-                  <td>{team.playerCount}</td>
+                  <td>
+                    <button
+                      className="btn btn--secondary btn--sm"
+                      onClick={() => setRoster(team)}
+                    >
+                      Plantel ({team.playerCount})
+                    </button>
+                  </td>
                   <td>
                     <div className="row-actions">
                       <button
@@ -143,6 +158,14 @@ export default function AdminTeamsPage() {
           error={remove.error}
           onConfirm={handleDelete}
           onClose={() => setConfirm(null)}
+        />
+      )}
+
+      {roster && (
+        <TeamRosterModal
+          team={roster}
+          onClose={() => setRoster(null)}
+          onChanged={reload}
         />
       )}
     </>

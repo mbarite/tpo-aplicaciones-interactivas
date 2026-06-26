@@ -12,6 +12,11 @@ const teamSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true
+    },
+    logoUrl: {
+      type: String,
+      trim: true,
+      default: ""
     }
   },
   {

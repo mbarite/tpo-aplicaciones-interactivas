@@ -3,6 +3,16 @@ const Team = require("../models/team.model");
 const catchAsync = require("../utils/catchAsync");
 const httpError = require("../utils/httpError");
 const serializeMatch = require("../utils/serializeMatch");
+const resolveSeasonId = require("../utils/resolveSeasonId");
+
+function mapPlayerStats(stats) {
+  if (!Array.isArray(stats)) {
+    return undefined;
+  }
+  return stats
+    .filter((item) => item && item.playerId)
+    .map((item) => ({ player: item.playerId, points: Number(item.points) || 0 }));
+}
 
 async function validateTeams(homeTeamId, awayTeamId) {
   if (homeTeamId === awayTeamId) {
@@ -27,9 +37,18 @@ const listMatches = catchAsync(async (req, res) => {
     filter.status = req.query.status;
   }
 
+  const seasonId = await resolveSeasonId(req.query.season);
+  if (seasonId) {
+    filter.season = seasonId;
+  }
+  if (req.query.category) {
+    filter.category = req.query.category;
+  }
+
   const matches = await Match.find(filter)
     .populate("homeTeam", "name")
     .populate("awayTeam", "name")
+    .populate("season", "name year")
     .sort({ date: 1, time: 1 })
     .lean();
 
@@ -37,10 +56,21 @@ const listMatches = catchAsync(async (req, res) => {
 });
 
 const createMatch = catchAsync(async (req, res) => {
-  const { homeTeamId, awayTeamId, date, time, venue } = req.body;
+  const { homeTeamId, awayTeamId, date, time, venue, category } = req.body;
+  const seasonId = req.body.seasonId || (await resolveSeasonId(null));
+
+  if (!seasonId) {
+    throw httpError(
+      400,
+      "No hay una temporada activa. Crea o activa una temporada antes de crear partidos."
+    );
+  }
+
   await validateTeams(homeTeamId, awayTeamId);
 
   const match = await Match.create({
+    season: seasonId,
+    category,
     homeTeam: homeTeamId,
     awayTeam: awayTeamId,
     date,
@@ -50,6 +80,7 @@ const createMatch = catchAsync(async (req, res) => {
 
   await match.populate("homeTeam", "name");
   await match.populate("awayTeam", "name");
+  await match.populate("season", "name year");
 
   res.status(201).json({
     message: "Partido creado correctamente.",
@@ -59,7 +90,7 @@ const createMatch = catchAsync(async (req, res) => {
 
 const updateMatch = catchAsync(async (req, res) => {
   const { matchId } = req.params;
-  const { homeTeamId, awayTeamId, date, time, venue } = req.body;
+  const { homeTeamId, awayTeamId, date, time, venue, category, seasonId } = req.body;
   const match = await Match.findById(matchId);
 
   if (!match) {
@@ -75,10 +106,15 @@ const updateMatch = catchAsync(async (req, res) => {
   match.date = date ?? match.date;
   match.time = time ?? match.time;
   match.venue = venue ?? match.venue;
+  match.category = category ?? match.category;
+  if (seasonId) {
+    match.season = seasonId;
+  }
 
   await match.save();
   await match.populate("homeTeam", "name");
   await match.populate("awayTeam", "name");
+  await match.populate("season", "name year");
 
   res.json({
     message: "Partido actualizado correctamente.",
@@ -113,9 +149,19 @@ const loadResult = catchAsync(async (req, res) => {
   match.awayScore = awayScore;
   match.status = "played";
 
+  const homeStats = mapPlayerStats(req.body.homePlayerStats);
+  const awayStats = mapPlayerStats(req.body.awayPlayerStats);
+  if (homeStats) {
+    match.homePlayerStats = homeStats;
+  }
+  if (awayStats) {
+    match.awayPlayerStats = awayStats;
+  }
+
   await match.save();
   await match.populate("homeTeam", "name");
   await match.populate("awayTeam", "name");
+  await match.populate("season", "name year");
 
   res.json({
     message: "Resultado cargado correctamente.",

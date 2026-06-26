@@ -7,11 +7,19 @@ import { required, isDate, isTime, collectErrors } from "../../utils/validation"
 export default function MatchForm({
   initial,
   teams,
+  seasons,
+  categories,
   onSubmit,
   onCancel,
   submitting,
   submitError
 }) {
+  const defaultSeason =
+    initial?.season?.id || seasons.find((s) => s.isActive)?.id || seasons[0]?.id || "";
+  const defaultCategory = initial?.category || categories[0]?.name || "";
+
+  const [seasonId, setSeasonId] = useState(defaultSeason);
+  const [category, setCategory] = useState(defaultCategory);
   const [homeTeamId, setHomeTeamId] = useState(initial?.homeTeam?.id || "");
   const [awayTeamId, setAwayTeamId] = useState(initial?.awayTeam?.id || "");
   const [date, setDate] = useState(initial?.date || "");
@@ -22,6 +30,8 @@ export default function MatchForm({
   const handleSubmit = (event) => {
     event.preventDefault();
     const nextErrors = collectErrors({
+      seasonId: required(seasonId, "La temporada"),
+      category: required(category, "La categoria"),
       homeTeamId: required(homeTeamId, "El equipo local"),
       awayTeamId: required(awayTeamId, "El equipo visitante"),
       date: required(date, "La fecha") || isDate(date),
@@ -36,18 +46,45 @@ export default function MatchForm({
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    onSubmit({
-      homeTeamId,
-      awayTeamId,
-      date,
-      time,
-      venue: venue.trim()
-    });
+    onSubmit({ seasonId, category, homeTeamId, awayTeamId, date, time, venue: venue.trim() });
   };
 
   return (
     <form className="form" onSubmit={handleSubmit}>
       {submitError && <Alert type="error">{submitError}</Alert>}
+
+      <div className="form-row">
+        <Field label="Temporada" htmlFor="match-season" error={errors.seasonId}>
+          <select
+            id="match-season"
+            value={seasonId}
+            onChange={(event) => setSeasonId(event.target.value)}
+          >
+            <option value="">Seleccionar</option>
+            {seasons.map((season) => (
+              <option key={season.id} value={season.id}>
+                {season.name}
+                {season.isActive ? " · actual" : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Categoria" htmlFor="match-category" error={errors.category}>
+          <select
+            id="match-category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            <option value="">Seleccionar</option>
+            {categories.map((item) => (
+              <option key={item.id} value={item.name}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
 
       <div className="form-row">
         <Field label="Equipo local" htmlFor="match-home" error={errors.homeTeamId}>

@@ -10,6 +10,8 @@ import {
   deleteMatch
 } from "../../services/matchService";
 import { getTeams } from "../../services/teamService";
+import { getSeasons } from "../../services/seasonService";
+import { getCategories } from "../../services/categoryService";
 
 import MatchCard from "../../components/MatchCard";
 import MatchForm from "../../components/admin/MatchForm";
@@ -23,6 +25,8 @@ import EmptyState from "../../components/ui/EmptyState";
 export default function AdminMatchesPage() {
   const matches = useAsync(() => getMatches(), []);
   const teams = useAsync(getTeams, []);
+  const seasons = useAsync(getSeasons, []);
+  const categories = useAsync(getCategories, []);
   const [formModal, setFormModal] = useState(null); // { mode, match }
   const [resultModal, setResultModal] = useState(null); // match
   const [confirm, setConfirm] = useState(null); // match a eliminar
@@ -30,10 +34,15 @@ export default function AdminMatchesPage() {
   const result = useMutation();
   const remove = useMutation();
 
-  const loading = matches.loading || teams.loading;
-  const error = matches.error || teams.error;
+  const loading =
+    matches.loading || teams.loading || seasons.loading || categories.loading;
+  const error = matches.error || teams.error || seasons.error || categories.error;
   const teamList = teams.data || [];
-  const notEnoughTeams = !loading && teamList.length < 2;
+  const seasonList = seasons.data || [];
+  const categoryList = categories.data || [];
+  const missingSetup =
+    !loading &&
+    (teamList.length < 2 || seasonList.length === 0 || categoryList.length === 0);
 
   const openCreate = () => {
     save.reset();
@@ -90,16 +99,17 @@ export default function AdminMatchesPage() {
         <button
           className="btn btn--primary"
           onClick={openCreate}
-          disabled={notEnoughTeams}
+          disabled={missingSetup}
         >
           + Nuevo partido
         </button>
       </div>
 
-      {notEnoughTeams && (
+      {missingSetup && (
         <div className="section">
           <Alert type="info">
-            Necesitas al menos dos equipos para programar un partido.
+            Para programar un partido necesitas al menos dos equipos, una temporada y
+            una categoría creadas.
           </Alert>
         </div>
       )}
@@ -152,6 +162,8 @@ export default function AdminMatchesPage() {
           <MatchForm
             initial={formModal.match}
             teams={teamList}
+            seasons={seasonList}
+            categories={categoryList}
             onSubmit={handleFormSubmit}
             onCancel={() => setFormModal(null)}
             submitting={save.submitting}

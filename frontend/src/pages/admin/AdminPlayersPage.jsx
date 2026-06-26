@@ -9,6 +9,7 @@ import {
   deletePlayer
 } from "../../services/playerService";
 import { getTeams } from "../../services/teamService";
+import { getCategories } from "../../services/categoryService";
 
 import PlayerForm from "../../components/admin/PlayerForm";
 import Badge from "../../components/ui/Badge";
@@ -21,14 +22,20 @@ import EmptyState from "../../components/ui/EmptyState";
 export default function AdminPlayersPage() {
   const players = useAsync(getPlayers, []);
   const teams = useAsync(getTeams, []);
+  const categories = useAsync(getCategories, []);
   const [modal, setModal] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState("");
   const save = useMutation();
   const remove = useMutation();
 
-  const loading = players.loading || teams.loading;
-  const error = players.error || teams.error;
+  const loading = players.loading || teams.loading || categories.loading;
+  const error = players.error || teams.error || categories.error;
   const teamList = teams.data || [];
+  const categoryList = categories.data || [];
+  const visiblePlayers = categoryFilter
+    ? (players.data || []).filter((player) => player.category === categoryFilter)
+    : players.data || [];
 
   const openCreate = () => {
     save.reset();
@@ -64,22 +71,48 @@ export default function AdminPlayersPage() {
     );
   };
 
-  const noTeams = !loading && teamList.length === 0;
+  const cannotCreate =
+    !loading && (teamList.length === 0 || categoryList.length === 0);
 
   return (
     <>
       <div className="toolbar">
         <h1>Jugadores</h1>
-        <button className="btn btn--primary" onClick={openCreate} disabled={noTeams}>
+        <button
+          className="btn btn--primary"
+          onClick={openCreate}
+          disabled={cannotCreate}
+        >
           + Nuevo jugador
         </button>
       </div>
 
-      {noTeams && (
+      {cannotCreate && (
         <div className="section">
           <Alert type="info">
-            Primero crea al menos un equipo para poder asociar jugadores.
+            Para cargar jugadores necesitas al menos un equipo y una categoría creados.
           </Alert>
+        </div>
+      )}
+
+      {!loading && !error && categoryList.length > 0 && (players.data || []).length > 0 && (
+        <div
+          className="flex gap-2"
+          style={{ alignItems: "center", marginBottom: "var(--space-4)" }}
+        >
+          <span className="text-muted">Filtrar por categoría:</span>
+          <select
+            className="league-select"
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+          >
+            <option value="">Todas</option>
+            {categoryList.map((item) => (
+              <option key={item.id} value={item.name}>
+                {item.name}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -87,11 +120,15 @@ export default function AdminPlayersPage() {
         <Loading label="Cargando jugadores..." />
       ) : error ? (
         <Alert type="error">{error}</Alert>
-      ) : players.data.length === 0 ? (
+      ) : visiblePlayers.length === 0 ? (
         <EmptyState
           icon="🏃"
           title="Sin jugadores"
-          message="Todavia no hay jugadores cargados en la liga."
+          message={
+            categoryFilter
+              ? "No hay jugadores en esa categoría."
+              : "Todavia no hay jugadores cargados en la liga."
+          }
         />
       ) : (
         <div className="table-wrap">
@@ -105,7 +142,7 @@ export default function AdminPlayersPage() {
               </tr>
             </thead>
             <tbody>
-              {players.data.map((player) => (
+              {visiblePlayers.map((player) => (
                 <tr key={player.id}>
                   <td className="cell-strong">{player.fullName}</td>
                   <td>
@@ -143,6 +180,7 @@ export default function AdminPlayersPage() {
           <PlayerForm
             initial={modal.player}
             teams={teamList}
+            categories={categoryList}
             onSubmit={handleSubmit}
             onCancel={() => setModal(null)}
             submitting={save.submitting}

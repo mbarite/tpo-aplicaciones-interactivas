@@ -3,7 +3,14 @@ const ensureDefaultAdmin = require("./ensureDefaultAdmin");
 const Team = require("../models/team.model");
 const Player = require("../models/player.model");
 const Match = require("../models/match.model");
-const { upsertTeams, upsertMatches } = require("./seedDemoData");
+const Season = require("../models/season.model");
+const Category = require("../models/category.model");
+const {
+  upsertCategories,
+  upsertSeasons,
+  upsertTeams,
+  upsertMatches
+} = require("./seedDemoData");
 
 async function run() {
   await connectDatabase();
@@ -12,9 +19,13 @@ async function run() {
   await Match.deleteMany({});
   await Player.deleteMany({});
   await Team.deleteMany({});
+  await Season.deleteMany({});
+  await Category.deleteMany({});
 
+  await upsertCategories();
+  const seasonIdsByYear = await upsertSeasons();
   const teamIdsByName = await upsertTeams();
-  await upsertMatches(teamIdsByName);
+  await upsertMatches(teamIdsByName, seasonIdsByYear);
 
   console.log("Base demo reiniciada correctamente");
   process.exit(0);

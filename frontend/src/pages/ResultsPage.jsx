@@ -1,4 +1,5 @@
 import { useAsync } from "../hooks/useAsync";
+import { useLeague } from "../context/LeagueContext";
 import { getResults } from "../services/matchService";
 import MatchCard from "../components/MatchCard";
 import Loading from "../components/ui/Loading";
@@ -6,12 +7,16 @@ import Alert from "../components/ui/Alert";
 import EmptyState from "../components/ui/EmptyState";
 
 export default function ResultsPage() {
-  const { data, loading, error } = useAsync(getResults, []);
+  const { seasonId, category } = useLeague();
+  const { data, loading, error } = useAsync(
+    () => getResults(seasonId, category),
+    [seasonId, category]
+  );
 
   return (
     <div className="container page">
       <header className="page-header">
-        <h1>Resultados</h1>
+        <h1>Resultados {category && `· ${category}`}</h1>
         <p>Marcadores finales de los partidos ya disputados.</p>
       </header>
 

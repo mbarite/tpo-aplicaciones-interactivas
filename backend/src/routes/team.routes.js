@@ -29,7 +29,8 @@ router.post(
     body("coachName")
       .trim()
       .notEmpty()
-      .withMessage("El nombre del entrenador es obligatorio.")
+      .withMessage("El nombre del entrenador es obligatorio."),
+    body("logoUrl").optional({ values: "falsy" }).isString().trim()
   ],
   validateRequest,
   createTeam
@@ -49,7 +50,8 @@ router.put(
       .optional()
       .trim()
       .notEmpty()
-      .withMessage("El nombre del entrenador no puede estar vacio.")
+      .withMessage("El nombre del entrenador no puede estar vacio."),
+    body("logoUrl").optional({ values: "falsy" }).isString().trim()
   ],
   validateRequest,
   updateTeam

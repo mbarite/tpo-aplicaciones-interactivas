@@ -11,6 +11,7 @@ import CalendarPage from "./pages/CalendarPage";
 import ResultsPage from "./pages/ResultsPage";
 import TeamsPage from "./pages/TeamsPage";
 import TeamDetailPage from "./pages/TeamDetailPage";
+import HistoryPage from "./pages/HistoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 import LoginPage from "./pages/admin/LoginPage";
@@ -18,6 +19,8 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminTeamsPage from "./pages/admin/AdminTeamsPage";
 import AdminPlayersPage from "./pages/admin/AdminPlayersPage";
 import AdminMatchesPage from "./pages/admin/AdminMatchesPage";
+import AdminSeasonsPage from "./pages/admin/AdminSeasonsPage";
+import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 
 function App() {
   return (
@@ -32,6 +35,7 @@ function App() {
           <Route path="/resultados" element={<ResultsPage />} />
           <Route path="/equipos" element={<TeamsPage />} />
           <Route path="/equipos/:teamId" element={<TeamDetailPage />} />
+          <Route path="/historicos" element={<HistoryPage />} />
         </Route>
 
         {/* ---- Login admin (sin layout publico) ---- */}
@@ -47,6 +51,8 @@ function App() {
           }
         >
           <Route index element={<AdminDashboardPage />} />
+          <Route path="temporadas" element={<AdminSeasonsPage />} />
+          <Route path="categorias" element={<AdminCategoriesPage />} />
           <Route path="equipos" element={<AdminTeamsPage />} />
           <Route path="jugadores" element={<AdminPlayersPage />} />
           <Route path="partidos" element={<AdminMatchesPage />} />

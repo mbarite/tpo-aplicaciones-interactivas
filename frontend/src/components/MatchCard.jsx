@@ -13,7 +13,10 @@ export default function MatchCard({ match, actions }) {
     <article className="match-card">
       <div className="match-card__top">
         <span>{formatLongDate(match.date)}</span>
-        <MatchStatusBadge status={match.status} />
+        <span className="flex gap-2" style={{ alignItems: "center" }}>
+          {match.category && <span className="match-card__cat">{match.category}</span>}
+          <MatchStatusBadge status={match.status} />
+        </span>
       </div>
 
       <div className="match-card__teams">

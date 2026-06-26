@@ -1,7 +1,34 @@
 const mongoose = require("mongoose");
 
+// Puntos anotados por un jugador en un partido (estadisticas por jugador).
+const playerStatSchema = new mongoose.Schema(
+  {
+    player: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+      required: true
+    },
+    points: {
+      type: Number,
+      min: 0,
+      default: 0
+    }
+  },
+  { _id: false }
+);
+
 const matchSchema = new mongoose.Schema(
   {
+    season: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Season",
+      required: true
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true
+    },
     homeTeam: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
@@ -41,6 +68,14 @@ const matchSchema = new mongoose.Schema(
       type: Number,
       min: 0,
       default: null
+    },
+    homePlayerStats: {
+      type: [playerStatSchema],
+      default: []
+    },
+    awayPlayerStats: {
+      type: [playerStatSchema],
+      default: []
     }
   },
   {
