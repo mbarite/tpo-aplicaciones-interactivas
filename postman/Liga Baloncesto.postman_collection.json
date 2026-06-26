@@ -2,34 +2,18 @@
   "info": {
     "_postman_id": "7f7d0dbe-c759-4b99-8fc8-0f44f1827f9d",
     "name": "Liga Baloncesto API",
-    "description": "Coleccion para demostrar el backend del TPO de liga de baloncesto juvenil.",
+    "description": "Coleccion para demostrar el backend del TPO de liga de baloncesto juvenil. Incluye temporadas, categorias (torneos), clasificacion por torneo e historicos. Orden sugerido: en Publicos correr 'Ver Temporadas' y 'Ver Categorias' (cargan las variables seasonId y categoryName) y 'Ver Equipos' (carga teamId y awayTeamId); en Admin correr 'Login Admin' primero.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:4000/api"
-    },
-    {
-      "key": "token",
-      "value": ""
-    },
-    {
-      "key": "teamId",
-      "value": ""
-    },
-    {
-      "key": "awayTeamId",
-      "value": ""
-    },
-    {
-      "key": "playerId",
-      "value": ""
-    },
-    {
-      "key": "matchId",
-      "value": ""
-    }
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "token", "value": "" },
+    { "key": "seasonId", "value": "" },
+    { "key": "categoryName", "value": "U17" },
+    { "key": "teamId", "value": "" },
+    { "key": "awayTeamId", "value": "" },
+    { "key": "playerId", "value": "" },
+    { "key": "matchId", "value": "" }
   ],
   "item": [
     {
@@ -40,30 +24,79 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        },
+        {
+          "name": "Ver Temporadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/seasons", "host": ["{{baseUrl}}"], "path": ["seasons"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length) {",
+                  "  const active = data.find(s => s.isActive) || data[0];",
+                  "  pm.collectionVariables.set('seasonId', active.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver Categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length) {",
+                  "  pm.collectionVariables.set('categoryName', data[0].name);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver Clasificacion (por torneo)",
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/health",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "health"
+              "raw": "{{baseUrl}}/standings?season={{seasonId}}&category={{categoryName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["standings"],
+              "query": [
+                { "key": "season", "value": "{{seasonId}}" },
+                { "key": "category", "value": "{{categoryName}}" }
               ]
             }
           }
         },
         {
-          "name": "Ver Clasificacion",
+          "name": "Historicos / Campeones",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/standings",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "standings"
-              ]
+              "raw": "{{baseUrl}}/standings/champions",
+              "host": ["{{baseUrl}}"],
+              "path": ["standings", "champions"]
             }
           }
         },
@@ -72,15 +105,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/teams",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "teams"
-              ]
-            }
+            "url": { "raw": "{{baseUrl}}/teams", "host": ["{{baseUrl}}"], "path": ["teams"] }
           },
           "event": [
             {
@@ -104,13 +129,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/teams/{{teamId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "teams",
-                "{{teamId}}"
+              "raw": "{{baseUrl}}/teams/{{teamId}}?season={{seasonId}}&category={{categoryName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "{{teamId}}"],
+              "query": [
+                { "key": "season", "value": "{{seasonId}}" },
+                { "key": "category", "value": "{{categoryName}}" }
               ]
             }
           }
@@ -121,13 +145,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/matches/calendar",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "matches",
-                "calendar"
+              "raw": "{{baseUrl}}/matches/calendar?season={{seasonId}}&category={{categoryName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["matches", "calendar"],
+              "query": [
+                { "key": "season", "value": "{{seasonId}}" },
+                { "key": "category", "value": "{{categoryName}}" }
               ]
             }
           }
@@ -138,13 +161,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/matches/results",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "matches",
-                "results"
+              "raw": "{{baseUrl}}/matches/results?season={{seasonId}}&category={{categoryName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["matches", "results"],
+              "query": [
+                { "key": "season", "value": "{{seasonId}}" },
+                { "key": "category", "value": "{{categoryName}}" }
               ]
             }
           }
@@ -158,26 +180,9 @@
           "name": "Login Admin",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
           },
           "event": [
             {
@@ -198,51 +203,72 @@
           "name": "Perfil Admin",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/auth/me",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "auth",
-                "me"
-              ]
-            }
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
           }
+        },
+        {
+          "name": "Crear Temporada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Temporada 2027\",\n  \"year\": 2027,\n  \"isActive\": false\n}" },
+            "url": { "raw": "{{baseUrl}}/seasons", "host": ["{{baseUrl}}"], "path": ["seasons"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.season && data.season.id) {",
+                  "  pm.collectionVariables.set('seasonId', data.season.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"U19\",\n  \"order\": 4\n}" },
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.category && data.category.name) {",
+                  "  pm.collectionVariables.set('categoryName', data.category.name);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Crear Equipo",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Panteras del Este\",\n  \"coachName\": \"Julieta Romero\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/teams",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "teams"
-              ]
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Panteras del Este\",\n  \"coachName\": \"Julieta Romero\",\n  \"logoUrl\": \"\"\n}" },
+            "url": { "raw": "{{baseUrl}}/teams", "host": ["{{baseUrl}}"], "path": ["teams"] }
           },
           "event": [
             {
@@ -264,29 +290,11 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"coachName\": \"Julieta Romero Diaz\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/teams/{{teamId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "teams",
-                "{{teamId}}"
-              ]
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"coachName\": \"Julieta Romero Diaz\"\n}" },
+            "url": { "raw": "{{baseUrl}}/teams/{{teamId}}", "host": ["{{baseUrl}}"], "path": ["teams", "{{teamId}}"] }
           }
         },
         {
@@ -294,28 +302,11 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Nicolas\",\n  \"lastName\": \"Dominguez\",\n  \"category\": \"U17\",\n  \"teamId\": \"{{teamId}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/players",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "players"
-              ]
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Nicolas\",\n  \"lastName\": \"Dominguez\",\n  \"category\": \"{{categoryName}}\",\n  \"teamId\": \"{{teamId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/players", "host": ["{{baseUrl}}"], "path": ["players"] }
           },
           "event": [
             {
@@ -337,28 +328,11 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"homeTeamId\": \"{{teamId}}\",\n  \"awayTeamId\": \"{{awayTeamId}}\",\n  \"date\": \"2026-05-10\",\n  \"time\": \"20:30\",\n  \"venue\": \"Club Central\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/matches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "matches"
-              ]
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"seasonId\": \"{{seasonId}}\",\n  \"category\": \"{{categoryName}}\",\n  \"homeTeamId\": \"{{teamId}}\",\n  \"awayTeamId\": \"{{awayTeamId}}\",\n  \"date\": \"2026-05-10\",\n  \"time\": \"20:30\",\n  \"venue\": \"Club Central\"\n}" },
+            "url": { "raw": "{{baseUrl}}/matches", "host": ["{{baseUrl}}"], "path": ["matches"] }
           },
           "event": [
             {
@@ -380,96 +354,35 @@
           "request": {
             "method": "PATCH",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"homeScore\": 81,\n  \"awayScore\": 77\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/matches/{{matchId}}/result",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "matches",
-                "{{matchId}}",
-                "result"
-              ]
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"homeScore\": 81,\n  \"awayScore\": 77\n}" },
+            "url": { "raw": "{{baseUrl}}/matches/{{matchId}}/result", "host": ["{{baseUrl}}"], "path": ["matches", "{{matchId}}", "result"] }
           }
         },
         {
           "name": "Eliminar Partido",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/matches/{{matchId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "matches",
-                "{{matchId}}"
-              ]
-            }
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/matches/{{matchId}}", "host": ["{{baseUrl}}"], "path": ["matches", "{{matchId}}"] }
           }
         },
         {
           "name": "Eliminar Jugador",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/players/{{playerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "players",
-                "{{playerId}}"
-              ]
-            }
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/players/{{playerId}}", "host": ["{{baseUrl}}"], "path": ["players", "{{playerId}}"] }
           }
         },
         {
           "name": "Eliminar Equipo",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/teams/{{teamId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "teams",
-                "{{teamId}}"
-              ]
-            }
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/teams/{{teamId}}", "host": ["{{baseUrl}}"], "path": ["teams", "{{teamId}}"] }
           }
         }
       ]
