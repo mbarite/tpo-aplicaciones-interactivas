@@ -1,16 +1,21 @@
 import { useAsync } from "../hooks/useAsync";
+import { useLeague } from "../context/LeagueContext";
 import { getStandings } from "../services/standingService";
 import StandingsTable from "../components/StandingsTable";
 import Loading from "../components/ui/Loading";
 import Alert from "../components/ui/Alert";
 
 export default function StandingsPage() {
-  const { data, loading, error } = useAsync(getStandings, []);
+  const { seasonId, category } = useLeague();
+  const { data, loading, error } = useAsync(
+    () => getStandings(seasonId, category),
+    [seasonId, category]
+  );
 
   return (
     <div className="container page">
       <header className="page-header">
-        <h1>Clasificacion general</h1>
+        <h1>Clasificacion {category && `· ${category}`}</h1>
         <p>
           Tabla calculada automaticamente: 3 puntos por partido ganado, 1 por empate
           y 0 por derrota. Los empates se resuelven por diferencia de tantos y luego

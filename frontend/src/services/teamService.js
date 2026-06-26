@@ -7,8 +7,11 @@ export async function getTeams() {
 }
 
 // GET /api/teams/:id -> detalle con players, playedMatches, pendingMatches y standings
-export async function getTeam(teamId) {
-  const { data } = await api.get(`/teams/${teamId}`);
+// (opcionalmente filtrado por temporada y categoria)
+export async function getTeam(teamId, seasonId, category) {
+  const { data } = await api.get(`/teams/${teamId}`, {
+    params: { season: seasonId || undefined, category: category || undefined }
+  });
   return data;
 }
 

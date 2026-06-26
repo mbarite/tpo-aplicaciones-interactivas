@@ -37,6 +37,8 @@ export default function AdminLayout() {
           <NavLink to="/admin" end>
             Resumen
           </NavLink>
+          <NavLink to="/admin/temporadas">Temporadas</NavLink>
+          <NavLink to="/admin/categorias">Categorías</NavLink>
           <NavLink to="/admin/equipos">Equipos</NavLink>
           <NavLink to="/admin/jugadores">Jugadores</NavLink>
           <NavLink to="/admin/partidos">Partidos</NavLink>

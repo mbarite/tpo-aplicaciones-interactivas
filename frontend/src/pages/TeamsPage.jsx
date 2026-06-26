@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
 import { getTeams } from "../services/teamService";
-import { teamInitials } from "../utils/text";
+import TeamLogo from "../components/TeamLogo";
 
 import Loading from "../components/ui/Loading";
 import Alert from "../components/ui/Alert";
@@ -36,9 +36,7 @@ export default function TeamsPage() {
               to={`/equipos/${team.id}`}
               className="card card--interactive team-card"
             >
-              <div className="team-card__avatar" aria-hidden="true">
-                {teamInitials(team.name)}
-              </div>
+              <TeamLogo team={team} size={52} />
               <div>
                 <h3>{team.name}</h3>
                 <div className="team-card__coach">DT: {team.coachName}</div>

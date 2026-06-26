@@ -526,3 +526,126 @@ table.data tbody tr:hover {
   gap: var(--space-3);
   margin-bottom: var(--space-5);
 }
+
+/* ---- Escudo / foto de equipo (TeamLogo) ---- */
+.team-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.team-logo--round {
+  border-radius: var(--radius-pill);
+}
+
+.team-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.team-logo__initials {
+  line-height: 1;
+}
+
+/* logo en linea dentro de tablas / celdas */
+.cell-team .team-logo {
+  width: 26px;
+  height: 26px;
+}
+
+.logo-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.logo-field input {
+  flex: 1;
+}
+
+.roster-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/* ---- Barra de torneo (temporada + categoria) ---- */
+.league-bar {
+  position: sticky;
+  top: var(--navbar-h);
+  z-index: 30;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.league-bar__inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+}
+
+.league-bar__title {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.league-bar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.league-bar__group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.league-select {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.league-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.15);
+}
+
+/* chip de categoria en tarjetas de partido */
+.match-card__cat {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+/* checkbox + etiqueta en linea */
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.check input {
+  width: auto;
+}

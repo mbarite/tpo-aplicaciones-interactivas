@@ -1,9 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
+import { useLeague } from "../context/LeagueContext";
 import { getTeam } from "../services/teamService";
-import { teamInitials, personInitials } from "../utils/text";
+import { personInitials } from "../utils/text";
 
+import TeamLogo from "../components/TeamLogo";
 import MatchCard from "../components/MatchCard";
 import Badge from "../components/ui/Badge";
 import Loading from "../components/ui/Loading";
@@ -43,7 +45,11 @@ function StatGrid({ standings }) {
 
 export default function TeamDetailPage() {
   const { teamId } = useParams();
-  const { data, loading, error } = useAsync(() => getTeam(teamId), [teamId]);
+  const { seasonId, category } = useLeague();
+  const { data, loading, error } = useAsync(
+    () => getTeam(teamId, seasonId, category),
+    [teamId, seasonId, category]
+  );
 
   if (loading) {
     return (
@@ -74,9 +80,7 @@ export default function TeamDetailPage() {
 
       <section className="section">
         <div className="team-hero">
-          <div className="team-hero__avatar" aria-hidden="true">
-            {teamInitials(data.name)}
-          </div>
+          <TeamLogo team={data} size={84} />
           <div>
             <h1>{data.name}</h1>
             <p className="text-muted">

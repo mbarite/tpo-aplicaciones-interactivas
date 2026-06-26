@@ -46,6 +46,9 @@ export default function Navbar() {
           <NavLink to="/equipos" onClick={close}>
             Equipos
           </NavLink>
+          <NavLink to="/historicos" onClick={close}>
+            Históricos
+          </NavLink>
           <Link to="/admin" className="btn btn--primary btn--sm" onClick={close}>
             Admin
           </Link>

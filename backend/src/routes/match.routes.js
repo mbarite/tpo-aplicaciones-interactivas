@@ -35,7 +35,9 @@ router.post(
     body("time")
       .matches(/^\d{2}:\d{2}$/)
       .withMessage("La hora debe tener formato HH:mm."),
-    body("venue").trim().notEmpty().withMessage("El lugar del partido es obligatorio.")
+    body("venue").trim().notEmpty().withMessage("El lugar del partido es obligatorio."),
+    body("category").trim().notEmpty().withMessage("La categoria es obligatoria."),
+    body("seasonId").optional().isMongoId().withMessage("La temporada no es valida.")
   ],
   validateRequest,
   createMatch
@@ -66,7 +68,9 @@ router.put(
       .optional()
       .trim()
       .notEmpty()
-      .withMessage("El lugar del partido no puede estar vacio.")
+      .withMessage("El lugar del partido no puede estar vacio."),
+    body("category").optional().trim().notEmpty(),
+    body("seasonId").optional().isMongoId()
   ],
   validateRequest,
   updateMatch

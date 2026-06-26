@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import EmptyState from "./ui/EmptyState";
+import TeamLogo from "./TeamLogo";
 
 function formatDiff(value) {
   return value > 0 ? `+${value}` : String(value);
@@ -50,6 +51,11 @@ export default function StandingsTable({ rows, compact = false }) {
               </td>
               <td>
                 <Link to={`/equipos/${row.teamId}`} className="cell-team">
+                  <TeamLogo
+                    team={{ name: row.team, logoUrl: row.logoUrl }}
+                    size={26}
+                    round
+                  />
                   {row.team}
                 </Link>
               </td>

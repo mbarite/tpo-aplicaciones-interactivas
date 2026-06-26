@@ -9,9 +9,26 @@ function serializeTeam(team) {
   };
 }
 
+function serializeSeason(season) {
+  if (!season) {
+    return null;
+  }
+  // La temporada puede venir poblada (objeto) o como ObjectId sin poblar.
+  if (typeof season === "object" && season.name) {
+    return {
+      id: season._id?.toString?.() || season.id,
+      name: season.name,
+      year: season.year
+    };
+  }
+  return { id: season.toString?.() || String(season), name: null };
+}
+
 function serializeMatch(match) {
   return {
     id: match._id?.toString?.() || match.id,
+    category: match.category,
+    season: serializeSeason(match.season),
     homeTeam: serializeTeam(match.homeTeam),
     awayTeam: serializeTeam(match.awayTeam),
     date: match.date,

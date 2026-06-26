@@ -4,11 +4,10 @@ import Field from "../ui/Field";
 import Alert from "../ui/Alert";
 import { required, collectErrors } from "../../utils/validation";
 
-const CATEGORIES = ["U13", "U15", "U17", "U19", "Libre"];
-
 export default function PlayerForm({
   initial,
   teams,
+  categories = [],
   onSubmit,
   onCancel,
   submitting,
@@ -65,24 +64,19 @@ export default function PlayerForm({
       </div>
 
       <div className="form-row">
-        <Field
-          label="Categoria"
-          htmlFor="player-category"
-          error={errors.category}
-          hint="Ej: U17"
-        >
-          <input
+        <Field label="Categoria" htmlFor="player-category" error={errors.category}>
+          <select
             id="player-category"
-            list="player-categories"
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            placeholder="Seleccione o escriba"
-          />
-          <datalist id="player-categories">
-            {CATEGORIES.map((item) => (
-              <option key={item} value={item} />
+          >
+            <option value="">Seleccionar</option>
+            {categories.map((item) => (
+              <option key={item.id} value={item.name}>
+                {item.name}
+              </option>
             ))}
-          </datalist>
+          </select>
         </Field>
 
         <Field label="Equipo" htmlFor="player-team" error={errors.teamId}>
