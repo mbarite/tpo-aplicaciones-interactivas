@@ -1,0 +1,119 @@
+import { useState } from "react";
+
+import Field from "../ui/Field";
+import Alert from "../ui/Alert";
+import { required, collectErrors } from "../../utils/validation";
+
+const CATEGORIES = ["U13", "U15", "U17", "U19", "Libre"];
+
+export default function PlayerForm({
+  initial,
+  teams,
+  onSubmit,
+  onCancel,
+  submitting,
+  submitError
+}) {
+  const [firstName, setFirstName] = useState(initial?.firstName || "");
+  const [lastName, setLastName] = useState(initial?.lastName || "");
+  const [category, setCategory] = useState(initial?.category || "");
+  const [teamId, setTeamId] = useState(initial?.team?.id || "");
+  const [errors, setErrors] = useState({});
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const nextErrors = collectErrors({
+      firstName: required(firstName, "El nombre"),
+      lastName: required(lastName, "El apellido"),
+      category: required(category, "La categoria"),
+      teamId: required(teamId, "El equipo")
+    });
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    onSubmit({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      category: category.trim(),
+      teamId
+    });
+  };
+
+  return (
+    <form className="form" onSubmit={handleSubmit}>
+      {submitError && <Alert type="error">{submitError}</Alert>}
+
+      <div className="form-row">
+        <Field label="Nombre" htmlFor="player-first" error={errors.firstName}>
+          <input
+            id="player-first"
+            value={firstName}
+            onChange={(event) => setFirstName(event.target.value)}
+            placeholder="Ej: Tomas"
+            autoFocus
+          />
+        </Field>
+
+        <Field label="Apellido" htmlFor="player-last" error={errors.lastName}>
+          <input
+            id="player-last"
+            value={lastName}
+            onChange={(event) => setLastName(event.target.value)}
+            placeholder="Ej: Rossi"
+          />
+        </Field>
+      </div>
+
+      <div className="form-row">
+        <Field
+          label="Categoria"
+          htmlFor="player-category"
+          error={errors.category}
+          hint="Ej: U17"
+        >
+          <input
+            id="player-category"
+            list="player-categories"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            placeholder="Seleccione o escriba"
+          />
+          <datalist id="player-categories">
+            {CATEGORIES.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
+        </Field>
+
+        <Field label="Equipo" htmlFor="player-team" error={errors.teamId}>
+          <select
+            id="player-team"
+            value={teamId}
+            onChange={(event) => setTeamId(event.target.value)}
+          >
+            <option value="">Seleccionar equipo</option>
+            {teams.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <div className="form-actions">
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={onCancel}
+          disabled={submitting}
+        >
+          Cancelar
+        </button>
+        <button className="btn btn--primary" disabled={submitting}>
+          {submitting ? "Guardando..." : "Guardar"}
+        </button>
+      </div>
+    </form>
+  );
+}
