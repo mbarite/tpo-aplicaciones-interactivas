@@ -27,7 +27,11 @@ const teamDefs = [
   { name: "Condores del Alto", coachName: "Raul Medina" },
   { name: "Jaguares del Rio", coachName: "Paula Sosa" },
   { name: "Toros del Valle", coachName: "Hernan Rios" },
-  { name: "Lobos del Lago", coachName: "Veronica Paz" }
+  { name: "Lobos del Lago", coachName: "Veronica Paz" },
+  { name: "Aguilas del Este", coachName: "Diego Romero" },
+  { name: "Bisontes del Llano", coachName: "Sofia Castro" },
+  { name: "Linces de la Sierra", coachName: "Andres Vega" },
+  { name: "Osos del Monte", coachName: "Natalia Ponce" }
 ];
 
 const FIRST_NAMES = [
@@ -91,8 +95,10 @@ function buildTournamentMatches(teamNames, year, category, monthOffset, playedRa
 
   return pairs.map((pair, idx) => {
     const played = idx < playedUntil;
-    const homeScore = 55 + ((idx * 7) % 35);
-    const awayScore = 55 + ((idx * 11) % 33);
+    // El anio y la categoria entran en el calculo para que cada torneo cerrado
+    // tenga resultados (y campeones) distintos en los historicos / palmares.
+    const homeScore = 55 + ((idx * 7 + year * 3 + monthOffset * 13) % 35);
+    const awayScore = 55 + ((idx * 11 + year * 5 + monthOffset * 17) % 33);
     return {
       year,
       category,
