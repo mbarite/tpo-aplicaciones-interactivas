@@ -162,6 +162,11 @@
   color: var(--color-primary-dark);
 }
 
+.badge--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
 /* ---- Stat cards ---- */
 .stat {
   background: var(--color-surface);
@@ -535,7 +540,7 @@ table.data tbody tr:hover {
   flex: none;
   overflow: hidden;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  background: #fff;
   color: #fff;
   font-weight: 800;
   line-height: 1;
@@ -545,14 +550,26 @@ table.data tbody tr:hover {
   border-radius: var(--radius-pill);
 }
 
+/* Escudo: se muestra completo (sin recortar) sobre fondo limpio. */
 .team-logo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 2px;
+  box-sizing: border-box;
   display: block;
 }
 
+/* Avatar de iniciales (cuando el equipo no tiene logo): badge naranja. */
 .team-logo__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: #fff;
+  border-radius: inherit;
   line-height: 1;
 }
 
@@ -632,8 +649,13 @@ table.data tbody tr:hover {
 
 /* chip de categoria en tarjetas de partido */
 .match-card__cat {
+  margin-right: auto;
   font-weight: 700;
   color: var(--color-primary-dark);
+  background: var(--color-primary-soft);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
 }
 
 /* checkbox + etiqueta en linea */

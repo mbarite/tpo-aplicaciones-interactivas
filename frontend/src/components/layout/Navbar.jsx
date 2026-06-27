@@ -37,11 +37,8 @@ export default function Navbar() {
           <NavLink to="/clasificacion" onClick={close}>
             Clasificacion
           </NavLink>
-          <NavLink to="/calendario" onClick={close}>
-            Calendario
-          </NavLink>
-          <NavLink to="/resultados" onClick={close}>
-            Resultados
+          <NavLink to="/partidos" onClick={close}>
+            Partidos
           </NavLink>
           <NavLink to="/equipos" onClick={close}>
             Equipos

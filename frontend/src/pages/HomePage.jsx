@@ -22,17 +22,10 @@ const QUICK_LINKS = [
   },
   {
     icon: "📅",
-    title: "Calendario",
-    text: "Todos los partidos programados con fecha, horario y sede.",
-    to: "/calendario",
-    label: "Ver calendario"
-  },
-  {
-    icon: "📊",
-    title: "Resultados",
-    text: "Marcadores finales de las fechas ya disputadas.",
-    to: "/resultados",
-    label: "Ver resultados"
+    title: "Partidos",
+    text: "Resultados y próximos encuentros, fecha por fecha, con detalle de cada partido.",
+    to: "/partidos",
+    label: "Ver partidos"
   },
   {
     icon: "👥",
@@ -68,7 +61,7 @@ export default function HomePage() {
             <Link to="/clasificacion" className="btn btn--primary">
               Ver clasificacion
             </Link>
-            <Link to="/calendario" className="btn btn--outline-light">
+            <Link to="/partidos" className="btn btn--outline-light">
               Calendario de partidos
             </Link>
             <Link to="/equipos" className="btn btn--outline-light">
@@ -113,8 +106,8 @@ export default function HomePage() {
         <section className="section">
           <div className="toolbar">
             <h2 className="section-title">Proximos partidos</h2>
-            <Link to="/calendario" className="btn btn--secondary btn--sm">
-              Ver calendario
+            <Link to="/partidos" className="btn btn--secondary btn--sm">
+              Ver partidos
             </Link>
           </div>
           {calendar.loading ? (
@@ -124,7 +117,7 @@ export default function HomePage() {
           ) : nextMatches.length > 0 ? (
             <div className="grid grid--cards">
               {nextMatches.map((match) => (
-                <MatchCard key={match.id} match={match} />
+                <MatchCard key={match.id} match={match} to={`/partidos/${match.id}`} />
               ))}
             </div>
           ) : (

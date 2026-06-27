@@ -25,7 +25,6 @@ export default function LeagueBar() {
             {seasons.map((season) => (
               <option key={season.id} value={season.id}>
                 {season.name}
-                {season.isActive ? " · actual" : ""}
               </option>
             ))}
           </select>

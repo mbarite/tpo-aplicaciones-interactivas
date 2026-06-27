@@ -5,7 +5,8 @@ function serializeTeam(team) {
 
   return {
     id: team._id?.toString?.() || team.id,
-    name: team.name
+    name: team.name,
+    logoUrl: team.logoUrl || ""
   };
 }
 

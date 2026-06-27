@@ -2,6 +2,7 @@ const Match = require("../models/match.model");
 const Team = require("../models/team.model");
 const Player = require("../models/player.model");
 const Season = require("../models/season.model");
+const Category = require("../models/category.model");
 const httpError = require("../utils/httpError");
 const serializeMatch = require("../utils/serializeMatch");
 
@@ -115,9 +116,10 @@ async function getTeamDetail(teamId, seasonId, category) {
     throw httpError(404, "Equipo no encontrado.");
   }
 
+  // Plantel de la categoria: incluye a los jugadores ascendidos a ella.
   const playerFilter = { team: teamId };
   if (category) {
-    playerFilter.category = category;
+    playerFilter.$or = [{ category }, { extraCategory: category }];
   }
 
   const matchFilter = { $or: [{ homeTeam: teamId }, { awayTeam: teamId }] };
@@ -131,8 +133,8 @@ async function getTeamDetail(teamId, seasonId, category) {
   const [players, matches, standings] = await Promise.all([
     Player.find(playerFilter).sort({ lastName: 1, firstName: 1 }).lean(),
     Match.find(matchFilter)
-      .populate("homeTeam", "name")
-      .populate("awayTeam", "name")
+      .populate("homeTeam", "name logoUrl")
+      .populate("awayTeam", "name logoUrl")
       .sort({ date: 1, time: 1 })
       .lean(),
     getStandings(seasonId, category)
@@ -170,6 +172,9 @@ async function getTeamDetail(teamId, seasonId, category) {
         lastName: player.lastName,
         fullName: `${player.firstName} ${player.lastName}`,
         category: player.category,
+        // En la categoria consultada, marca si el jugador esta ascendido (su
+        // categoria natural es menor que la que se esta viendo).
+        promoted: Boolean(category) && player.category !== category,
         points: pointsByPlayerId[player._id.toString()] || 0
       }))
       .sort((a, b) => b.points - a.points || a.fullName.localeCompare(b.fullName)),
@@ -186,6 +191,14 @@ async function getTeamDetail(teamId, seasonId, category) {
 // el equipo que quedo 1ro. Ademas, el conteo de titulos por equipo.
 async function getChampions() {
   const seasons = await Season.find().sort({ year: -1 }).lean();
+
+  // Orden de categorias definido por el campo `order` (U17 primero).
+  const categoryDocs = await Category.find().sort({ order: 1, name: 1 }).lean();
+  const categoryRank = {};
+  categoryDocs.forEach((cat, index) => {
+    categoryRank[cat.name] = index;
+  });
+
   const champions = [];
 
   for (const season of seasons) {
@@ -193,6 +206,9 @@ async function getChampions() {
       season: season._id,
       status: "played"
     });
+    categories.sort(
+      (a, b) => (categoryRank[a] ?? 99) - (categoryRank[b] ?? 99) || a.localeCompare(b)
+    );
 
     for (const category of categories) {
       const standings = await getStandings(season._id.toString(), category);

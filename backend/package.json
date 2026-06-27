@@ -5,6 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
+    "dev:local": "node dev-local.js",
     "start": "node src/server.js",
     "seed:admin": "node src/utils/seedAdmin.js",
     "seed:demo": "node src/utils/seedDemoData.js",
@@ -27,5 +28,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
   }
 }

@@ -1,5 +1,6 @@
 const Match = require("../models/match.model");
 const Team = require("../models/team.model");
+const Player = require("../models/player.model");
 const catchAsync = require("../utils/catchAsync");
 const httpError = require("../utils/httpError");
 const serializeMatch = require("../utils/serializeMatch");
@@ -46,13 +47,76 @@ const listMatches = catchAsync(async (req, res) => {
   }
 
   const matches = await Match.find(filter)
-    .populate("homeTeam", "name")
-    .populate("awayTeam", "name")
+    .populate("homeTeam", "name logoUrl")
+    .populate("awayTeam", "name logoUrl")
     .populate("season", "name year")
     .sort({ date: 1, time: 1 })
     .lean();
 
   res.json(matches.map(serializeMatch));
+});
+
+// Detalle de un partido + la alineacion (plantel de cada equipo en la categoria
+// del partido) con los puntos que anoto cada jugador en ese partido.
+const getMatchById = catchAsync(async (req, res) => {
+  const match = await Match.findById(req.params.matchId)
+    .populate("homeTeam", "name coachName logoUrl")
+    .populate("awayTeam", "name coachName logoUrl")
+    .populate("season", "name year")
+    .lean();
+
+  if (!match) {
+    throw httpError(404, "Partido no encontrado.");
+  }
+
+  // Alineacion de la categoria del partido: incluye a los jugadores ascendidos.
+  const rosterFilter = (teamId) => ({
+    team: teamId,
+    $or: [{ category: match.category }, { extraCategory: match.category }]
+  });
+  const [homePlayers, awayPlayers] = await Promise.all([
+    Player.find(rosterFilter(match.homeTeam._id))
+      .sort({ lastName: 1, firstName: 1 })
+      .lean(),
+    Player.find(rosterFilter(match.awayTeam._id))
+      .sort({ lastName: 1, firstName: 1 })
+      .lean()
+  ]);
+
+  const pointsMap = (stats) => {
+    const map = {};
+    (stats || []).forEach((stat) => {
+      map[stat.player.toString()] = stat.points || 0;
+    });
+    return map;
+  };
+
+  const buildLineup = (players, ptsMap) =>
+    players
+      .map((player) => ({
+        id: player._id.toString(),
+        fullName: `${player.firstName} ${player.lastName}`,
+        category: player.category,
+        promoted: player.category !== match.category,
+        points: ptsMap[player._id.toString()] || 0
+      }))
+      .sort((a, b) => b.points - a.points || a.fullName.localeCompare(b.fullName));
+
+  const base = serializeMatch(match);
+
+  res.json({
+    ...base,
+    homeTeam: {
+      ...base.homeTeam,
+      coachName: match.homeTeam.coachName,
+      lineup: buildLineup(homePlayers, pointsMap(match.homePlayerStats))
+    },
+    awayTeam: {
+      ...base.awayTeam,
+      coachName: match.awayTeam.coachName,
+      lineup: buildLineup(awayPlayers, pointsMap(match.awayPlayerStats))
+    }
+  });
 });
 
 const createMatch = catchAsync(async (req, res) => {
@@ -171,6 +235,7 @@ const loadResult = catchAsync(async (req, res) => {
 
 module.exports = {
   listMatches,
+  getMatchById,
   createMatch,
   updateMatch,
   deleteMatch,

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
@@ -45,10 +46,17 @@ function StatGrid({ standings }) {
 
 export default function TeamDetailPage() {
   const { teamId } = useParams();
-  const { seasonId, category } = useLeague();
+  const { seasonId, category, categories } = useLeague();
+
+  // Categoria seleccionada dentro de la pagina del equipo (pestañas).
+  const [cat, setCat] = useState(category);
+  useEffect(() => {
+    if (category) setCat(category);
+  }, [category]);
+
   const { data, loading, error } = useAsync(
-    () => getTeam(teamId, seasonId, category),
-    [teamId, seasonId, category]
+    () => getTeam(teamId, seasonId, cat),
+    [teamId, seasonId, cat]
   );
 
   if (loading) {
@@ -90,20 +98,34 @@ export default function TeamDetailPage() {
         </div>
       </section>
 
+      {/* Pestañas por categoria: cada una es su propio torneo / tabla. */}
+      <div className="cat-tabs">
+        {categories.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`cat-tab ${item.name === cat ? "is-active" : ""}`}
+            onClick={() => setCat(item.name)}
+          >
+            {item.name}
+          </button>
+        ))}
+      </div>
+
       <section className="section">
-        <h2 className="section-title">Estadisticas acumuladas</h2>
+        <h2 className="section-title">Estadisticas {cat && `· ${cat}`}</h2>
         <StatGrid standings={data.standings} />
       </section>
 
       <section className="section">
         <h2 className="section-title">
-          Plantel ({data.players.length})
+          Plantel {cat && `· ${cat}`} ({data.players.length})
         </h2>
         {data.players.length === 0 ? (
           <EmptyState
             icon="🧍"
-            title="Sin jugadores cargados"
-            message="Este equipo todavia no tiene jugadores asociados."
+            title="Sin jugadores en esta categoria"
+            message="Este equipo todavia no tiene jugadores en esta categoria."
           />
         ) : (
           <div className="player-list">
@@ -112,10 +134,15 @@ export default function TeamDetailPage() {
                 <span className="player-row__avatar" aria-hidden="true">
                   {personInitials(player.firstName, player.lastName)}
                 </span>
-                <span className="player-row__name">{player.fullName}</span>
-                <span style={{ marginLeft: "auto" }}>
-                  <Badge variant="primary">{player.category}</Badge>
+                <span className="player-row__name">
+                  {player.fullName}
+                  {player.promoted && (
+                    <Badge variant="warning" style={{ marginLeft: 8 }}>
+                      ↑ asciende de {player.category}
+                    </Badge>
+                  )}
                 </span>
+                <span className="player-row__pts">{player.points} pts</span>
               </div>
             ))}
           </div>
@@ -124,14 +151,14 @@ export default function TeamDetailPage() {
 
       <section className="section">
         <h2 className="section-title">
-          Partidos jugados ({data.playedMatches.length})
+          Partidos jugados {cat && `· ${cat}`} ({data.playedMatches.length})
         </h2>
         {data.playedMatches.length === 0 ? (
           <EmptyState icon="📊" message="Todavia no disputo partidos." />
         ) : (
           <div className="grid grid--cards">
             {data.playedMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
+              <MatchCard key={match.id} match={match} to={`/partidos/${match.id}`} />
             ))}
           </div>
         )}
@@ -139,14 +166,14 @@ export default function TeamDetailPage() {
 
       <section className="section">
         <h2 className="section-title">
-          Partidos pendientes ({data.pendingMatches.length})
+          Partidos pendientes {cat && `· ${cat}`} ({data.pendingMatches.length})
         </h2>
         {data.pendingMatches.length === 0 ? (
           <EmptyState icon="📅" message="No tiene partidos pendientes." />
         ) : (
           <div className="grid grid--cards">
             {data.pendingMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
+              <MatchCard key={match.id} match={match} to={`/partidos/${match.id}`} />
             ))}
           </div>
         )}

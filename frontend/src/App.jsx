@@ -7,8 +7,8 @@ import ScrollToTop from "./components/ScrollToTop";
 
 import HomePage from "./pages/HomePage";
 import StandingsPage from "./pages/StandingsPage";
-import CalendarPage from "./pages/CalendarPage";
-import ResultsPage from "./pages/ResultsPage";
+import MatchesPage from "./pages/MatchesPage";
+import MatchDetailPage from "./pages/MatchDetailPage";
 import TeamsPage from "./pages/TeamsPage";
 import TeamDetailPage from "./pages/TeamDetailPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -31,8 +31,11 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/clasificacion" element={<StandingsPage />} />
-          <Route path="/calendario" element={<CalendarPage />} />
-          <Route path="/resultados" element={<ResultsPage />} />
+          <Route path="/partidos" element={<MatchesPage />} />
+          <Route path="/partidos/:matchId" element={<MatchDetailPage />} />
+          {/* Rutas viejas: redirigen a la nueva pestaña unificada */}
+          <Route path="/calendario" element={<Navigate to="/partidos" replace />} />
+          <Route path="/resultados" element={<Navigate to="/partidos" replace />} />
           <Route path="/equipos" element={<TeamsPage />} />
           <Route path="/equipos/:teamId" element={<TeamDetailPage />} />
           <Route path="/historicos" element={<HistoryPage />} />

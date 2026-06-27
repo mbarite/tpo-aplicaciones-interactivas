@@ -16,6 +16,7 @@ const listPlayers = catchAsync(async (_req, res) => {
       lastName: player.lastName,
       fullName: `${player.firstName} ${player.lastName}`,
       category: player.category,
+      extraCategory: player.extraCategory || "",
       team: player.team
         ? {
             id: player.team._id.toString(),
@@ -27,7 +28,7 @@ const listPlayers = catchAsync(async (_req, res) => {
 });
 
 const createPlayer = catchAsync(async (req, res) => {
-  const { firstName, lastName, category, teamId } = req.body;
+  const { firstName, lastName, category, extraCategory, teamId } = req.body;
   const team = await Team.findById(teamId);
 
   if (!team) {
@@ -38,6 +39,7 @@ const createPlayer = catchAsync(async (req, res) => {
     firstName,
     lastName,
     category,
+    extraCategory: extraCategory || "",
     team: teamId
   });
 
@@ -49,6 +51,7 @@ const createPlayer = catchAsync(async (req, res) => {
       lastName: player.lastName,
       fullName: `${player.firstName} ${player.lastName}`,
       category: player.category,
+      extraCategory: player.extraCategory || "",
       team: {
         id: team._id.toString(),
         name: team.name
@@ -59,7 +62,7 @@ const createPlayer = catchAsync(async (req, res) => {
 
 const updatePlayer = catchAsync(async (req, res) => {
   const { playerId } = req.params;
-  const { firstName, lastName, category, teamId } = req.body;
+  const { firstName, lastName, category, extraCategory, teamId } = req.body;
   const player = await Player.findById(playerId);
 
   if (!player) {
@@ -79,6 +82,9 @@ const updatePlayer = catchAsync(async (req, res) => {
   player.firstName = firstName ?? player.firstName;
   player.lastName = lastName ?? player.lastName;
   player.category = category ?? player.category;
+  if (extraCategory !== undefined) {
+    player.extraCategory = extraCategory || "";
+  }
 
   await player.save();
   await player.populate("team", "name");
@@ -91,6 +97,7 @@ const updatePlayer = catchAsync(async (req, res) => {
       lastName: player.lastName,
       fullName: `${player.firstName} ${player.lastName}`,
       category: player.category,
+      extraCategory: player.extraCategory || "",
       team: {
         id: player.team._id.toString(),
         name: player.team.name

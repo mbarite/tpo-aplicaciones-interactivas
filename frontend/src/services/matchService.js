@@ -12,6 +12,12 @@ export async function getMatches(status, seasonId, category) {
   return data;
 }
 
+// GET /api/matches/:id -> detalle del partido con la alineacion de cada equipo
+export async function getMatch(matchId) {
+  const { data } = await api.get(`/matches/${matchId}`);
+  return data;
+}
+
 // GET /api/matches/calendar -> partidos programados (pendientes)
 export async function getCalendar(seasonId, category) {
   const { data } = await api.get("/matches/calendar", {

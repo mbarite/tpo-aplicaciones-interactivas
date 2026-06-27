@@ -16,6 +16,7 @@ export default function PlayerForm({
   const [firstName, setFirstName] = useState(initial?.firstName || "");
   const [lastName, setLastName] = useState(initial?.lastName || "");
   const [category, setCategory] = useState(initial?.category || "");
+  const [extraCategory, setExtraCategory] = useState(initial?.extraCategory || "");
   const [teamId, setTeamId] = useState(initial?.team?.id || "");
   const [errors, setErrors] = useState({});
 
@@ -34,6 +35,7 @@ export default function PlayerForm({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       category: category.trim(),
+      extraCategory: extraCategory ? extraCategory.trim() : "",
       teamId
     });
   };
@@ -91,6 +93,29 @@ export default function PlayerForm({
                 {team.name}
               </option>
             ))}
+          </select>
+        </Field>
+      </div>
+
+      <div className="form-row">
+        <Field
+          label="Asciende a (opcional)"
+          htmlFor="player-extra"
+          hint="Si juega tambien en una categoria superior"
+        >
+          <select
+            id="player-extra"
+            value={extraCategory}
+            onChange={(event) => setExtraCategory(event.target.value)}
+          >
+            <option value="">Sin ascenso</option>
+            {categories
+              .filter((item) => item.name !== category)
+              .map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
           </select>
         </Field>
       </div>

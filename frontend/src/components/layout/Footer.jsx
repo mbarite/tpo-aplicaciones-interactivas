@@ -13,8 +13,7 @@ export default function Footer() {
         </div>
         <nav className="flex gap-3 flex-wrap" style={{ fontSize: "0.9rem" }}>
           <Link to="/clasificacion">Clasificacion</Link>
-          <Link to="/calendario">Calendario</Link>
-          <Link to="/resultados">Resultados</Link>
+          <Link to="/partidos">Partidos</Link>
           <Link to="/equipos">Equipos</Link>
           <Link to="/admin">Acceso admin</Link>
         </nav>

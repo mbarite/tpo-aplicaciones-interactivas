@@ -5,6 +5,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const validateRequest = require("../middlewares/validateRequest.middleware");
 const {
   listMatches,
+  getMatchById,
   createMatch,
   updateMatch,
   deleteMatch,
@@ -22,6 +23,13 @@ router.get("/results", (req, _res, next) => {
   req.query.status = "played";
   next();
 }, listMatches);
+
+router.get(
+  "/:matchId",
+  [param("matchId").isMongoId().withMessage("El id del partido no es valido.")],
+  validateRequest,
+  getMatchById
+);
 
 router.post(
   "/",

@@ -147,6 +147,11 @@ export default function AdminPlayersPage() {
                   <td className="cell-strong">{player.fullName}</td>
                   <td>
                     <Badge variant="primary">{player.category}</Badge>
+                    {player.extraCategory && (
+                      <Badge variant="warning" style={{ marginLeft: 6 }}>
+                        ↑ {player.extraCategory}
+                      </Badge>
+                    )}
                   </td>
                   <td>{player.team?.name ?? "—"}</td>
                   <td>
