@@ -74,6 +74,27 @@ La app tiene 3 piezas. Cada una se publica en un servicio gratuito:
 
 ---
 
+## Paso 4 — Cargar los datos de demo en la base
+
+Recién creada, la base está vacía. Para llenarla con la liga de ejemplo
+(12 equipos, 180 jugadores, 3 temporadas y 3 categorías) corré el seed **desde tu PC
+apuntando a la base de Atlas** (no hace falta tocar Render):
+
+1. En la carpeta `backend`, creá un archivo `.env` (copiá `backend/.env.example`) y poné
+   en `MONGO_URI` la **misma cadena de Atlas** del Paso 1.
+2. Desde `backend` ejecutá:
+   ```bash
+   npm install
+   npm run seed:reset-demo
+   ```
+   Eso **borra y recarga** todos los datos de demo en la base de Atlas. Al terminar,
+   tu compañero (o cualquiera) ya ve la liga completa abriendo la URL de Vercel.
+
+> `seed:reset-demo` reinicia todo. Si solo querés **agregar/actualizar** sin borrar lo
+> existente, usá `npm run seed:demo`.
+
+---
+
 ## Después de publicar
 
 - Entrá a tu sitio de Vercel, tocá **Admin** e ingresá con el usuario/contraseña que
