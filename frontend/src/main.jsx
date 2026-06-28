@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { LeagueProvider } from "./context/LeagueContext";
+import { ToastProvider } from "./context/ToastContext";
 
 import "./styles/tokens.css";
 import "./styles/layout.css";
@@ -15,9 +16,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <LeagueProvider>
-          <App />
-        </LeagueProvider>
+        <ToastProvider>
+          <LeagueProvider>
+            <App />
+          </LeagueProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

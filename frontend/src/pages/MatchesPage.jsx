@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLeague } from "../context/LeagueContext";
 import { getMatches } from "../services/matchService";
 import MatchCard from "../components/MatchCard";
-import Loading from "../components/ui/Loading";
+import { SkeletonCards } from "../components/ui/Skeleton";
 import Alert from "../components/ui/Alert";
 import EmptyState from "../components/ui/EmptyState";
 import { formatLongDate } from "../utils/format";
@@ -23,8 +24,18 @@ function groupByDate(matches) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// Indice de la fecha con partidos mas cercana a hoy (o la ultima si todas pasaron).
+function nearestDayIndex(days) {
+  if (days.length === 0) return 0;
+  const today = new Date().toISOString().slice(0, 10);
+  const idx = days.findIndex((day) => day.date >= today);
+  return idx === -1 ? days.length - 1 : idx;
+}
+
 export default function MatchesPage() {
   const { seasonId, category } = useLeague();
+  useDocumentTitle(`Partidos${category ? ` · ${category}` : ""}`);
+
   const { data, loading, error } = useAsync(
     () => getMatches(undefined, seasonId, category),
     [seasonId, category]
@@ -33,19 +44,15 @@ export default function MatchesPage() {
   const days = useMemo(() => groupByDate(data || []), [data]);
   const [index, setIndex] = useState(0);
 
-  // Al cargar (o cambiar temporada/categoria) ubicarse en la fecha con partidos
-  // mas cercana a hoy; si todas son pasadas, en la ultima.
+  // Al cargar o cambiar datos/filtro, ubicarse en la fecha mas cercana a hoy.
   useEffect(() => {
-    if (days.length === 0) return;
-    const today = new Date().toISOString().slice(0, 10);
-    let target = days.findIndex((day) => day.date >= today);
-    if (target === -1) target = days.length - 1;
-    setIndex(target);
+    setIndex(nearestDayIndex(days));
   }, [days]);
 
   const current = days[index];
   const goPrev = () => setIndex((value) => Math.max(0, value - 1));
   const goNext = () => setIndex((value) => Math.min(days.length - 1, value + 1));
+  const goToday = () => setIndex(nearestDayIndex(days));
 
   return (
     <div className="container page">
@@ -58,14 +65,14 @@ export default function MatchesPage() {
       </header>
 
       {loading ? (
-        <Loading label="Cargando partidos..." />
+        <SkeletonCards count={6} />
       ) : error ? (
         <Alert type="error">{error}</Alert>
       ) : days.length === 0 || !current ? (
         <EmptyState
           icon="🏀"
           title="No hay partidos"
-          message="Todavía no se cargaron partidos para esta temporada o categoría."
+          message="No hay partidos para esta temporada, categoría o filtro."
         />
       ) : (
         <>
@@ -84,6 +91,10 @@ export default function MatchesPage() {
               <span className="day-nav__meta">
                 Fecha {index + 1} de {days.length} · {current.matches.length}{" "}
                 {current.matches.length === 1 ? "partido" : "partidos"}
+                {" · "}
+                <button type="button" className="link-btn" onClick={goToday}>
+                  Hoy
+                </button>
               </span>
             </div>
             <button
@@ -97,7 +108,7 @@ export default function MatchesPage() {
             </button>
           </div>
 
-          <div className="grid grid--cards">
+          <div className="grid grid--cards fade-in" key={current.date}>
             {current.matches.map((match) => (
               <MatchCard key={match.id} match={match} to={`/partidos/${match.id}`} />
             ))}

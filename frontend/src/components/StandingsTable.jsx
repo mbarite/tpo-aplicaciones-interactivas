@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "./ui/EmptyState";
 import TeamLogo from "./TeamLogo";
 
@@ -8,6 +8,8 @@ function formatDiff(value) {
 
 // Tabla de clasificacion. En modo `compact` oculta TF/TC (para previews chicas).
 export default function StandingsTable({ rows, compact = false }) {
+  const navigate = useNavigate();
+
   if (!rows || rows.length === 0) {
     return (
       <EmptyState
@@ -20,7 +22,7 @@ export default function StandingsTable({ rows, compact = false }) {
 
   return (
     <div className="table-wrap">
-      <table className="data">
+      <table className="data data--clickable">
         <thead>
           <tr>
             <th>#</th>
@@ -41,7 +43,15 @@ export default function StandingsTable({ rows, compact = false }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.teamId}>
+            <tr
+              key={row.teamId}
+              onClick={() => navigate(`/equipos/${row.teamId}`)}
+              role="link"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") navigate(`/equipos/${row.teamId}`);
+              }}
+            >
               <td>
                 <span
                   className={`pos ${row.position <= 3 ? `pos--${row.position}` : ""}`}
@@ -50,14 +60,14 @@ export default function StandingsTable({ rows, compact = false }) {
                 </span>
               </td>
               <td>
-                <Link to={`/equipos/${row.teamId}`} className="cell-team">
+                <span className="cell-team">
                   <TeamLogo
                     team={{ name: row.team, logoUrl: row.logoUrl }}
                     size={26}
                     round
                   />
                   {row.team}
-                </Link>
+                </span>
               </td>
               <td className="cell-strong">{row.points}</td>
               <td>{row.played}</td>

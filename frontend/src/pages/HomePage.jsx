@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { LEAGUE } from "../config";
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLeague } from "../context/LeagueContext";
 import { getStandings } from "../services/standingService";
 import { getCalendar } from "../services/matchService";
@@ -37,6 +38,7 @@ const QUICK_LINKS = [
 ];
 
 export default function HomePage() {
+  useDocumentTitle();
   const { seasonId, category } = useLeague();
   const standings = useAsync(
     () => getStandings(seasonId, category),

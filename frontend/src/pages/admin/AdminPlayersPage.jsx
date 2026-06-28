@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useAsync } from "../../hooks/useAsync";
 import { useMutation } from "../../hooks/useMutation";
+import { useToast } from "../../context/ToastContext";
 import {
   getPlayers,
   createPlayer,
@@ -26,6 +27,7 @@ export default function AdminPlayersPage() {
   const [modal, setModal] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("");
+  const { notify } = useToast();
   const save = useMutation();
   const remove = useMutation();
 
@@ -56,6 +58,11 @@ export default function AdminPlayersPage() {
       async () => {
         setModal(null);
         await players.reload();
+        notify(
+          modal.mode === "create"
+            ? "Jugador creado correctamente."
+            : "Jugador actualizado correctamente."
+        );
       }
     );
   };
@@ -67,6 +74,7 @@ export default function AdminPlayersPage() {
         setConfirm(null);
         await players.reload();
         await teams.reload();
+        notify("Jugador eliminado.");
       }
     );
   };

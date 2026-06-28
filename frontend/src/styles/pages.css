@@ -83,12 +83,16 @@
   align-items: center;
   gap: var(--space-1);
   text-align: center;
+  min-width: 0; /* permite que el nombre envuelva en vez de desbordar/cortarse */
 }
 
 .match-team__name {
   font-weight: 600;
   color: var(--color-ink);
   font-size: 0.95rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .match-team__role {
@@ -123,6 +127,62 @@
 
 .score-num--win {
   color: var(--color-primary);
+}
+
+/* ---- Match card: formato de filas (una por equipo) ---- */
+.match-card__rows {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-4);
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.match-row + .match-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.match-row__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match-row__score {
+  flex: none;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  min-width: 2ch;
+  text-align: right;
+}
+
+.match-row--win .match-row__name,
+.match-row--win .match-row__score {
+  color: var(--color-primary);
+}
+
+/* indicador Local / Visitante en partidos sin jugar */
+.match-row__ha {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .match-card__foot {
@@ -691,5 +751,40 @@
 
   .match-detail__score {
     font-size: 2rem;
+  }
+}
+
+/* ---- Ajustes finos para pantallas chicas (celulares) ---- */
+@media (max-width: 600px) {
+  .page {
+    padding-block: var(--space-5);
+  }
+
+  .section {
+    margin-bottom: var(--space-6);
+  }
+
+  /* Botones de accion del hero a lo ancho, mas comodos al tocar. */
+  .hero__actions .btn {
+    flex: 1 1 100%;
+  }
+
+  /* Navegador de fechas de Partidos. */
+  .day-nav {
+    padding: var(--space-3);
+  }
+
+  .day-nav__date {
+    font-size: 0.95rem;
+  }
+
+  .day-nav__btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Marcador del partido un poco mas compacto. */
+  .match-card__teams {
+    gap: var(--space-2);
   }
 }

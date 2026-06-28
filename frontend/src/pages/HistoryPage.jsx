@@ -1,4 +1,5 @@
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { getChampions } from "../services/standingService";
 
 import TeamLogo from "../components/TeamLogo";
@@ -8,6 +9,7 @@ import Alert from "../components/ui/Alert";
 import EmptyState from "../components/ui/EmptyState";
 
 export default function HistoryPage() {
+  useDocumentTitle("Históricos");
   const { data, loading, error } = useAsync(getChampions, []);
 
   return (

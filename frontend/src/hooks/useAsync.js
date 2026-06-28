@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Hook reutilizable para cargar datos de la API.
@@ -11,17 +11,22 @@ export function useAsync(asyncFn, deps = []) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Id de llamada: evita que una respuesta vieja (lenta) pise a una mas nueva.
+  const callId = useRef(0);
 
   const run = useCallback(async () => {
+    const id = (callId.current += 1);
     setLoading(true);
     setError(null);
     try {
       const result = await asyncFn();
-      setData(result);
+      if (id === callId.current) setData(result);
     } catch (err) {
-      setError(err.uiMessage || "No se pudieron cargar los datos.");
+      if (id === callId.current) {
+        setError(err.uiMessage || "No se pudieron cargar los datos.");
+      }
     } finally {
-      setLoading(false);
+      if (id === callId.current) setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

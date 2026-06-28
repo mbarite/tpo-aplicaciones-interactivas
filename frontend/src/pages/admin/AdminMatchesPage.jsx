@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useAsync } from "../../hooks/useAsync";
 import { useMutation } from "../../hooks/useMutation";
+import { useToast } from "../../context/ToastContext";
 import {
   getMatches,
   createMatch,
@@ -30,6 +31,7 @@ export default function AdminMatchesPage() {
   const [formModal, setFormModal] = useState(null); // { mode, match }
   const [resultModal, setResultModal] = useState(null); // match
   const [confirm, setConfirm] = useState(null); // match a eliminar
+  const { notify } = useToast();
   const save = useMutation();
   const result = useMutation();
   const remove = useMutation();
@@ -66,8 +68,10 @@ export default function AdminMatchesPage() {
           ? createMatch(payload)
           : updateMatch(formModal.match.id, payload),
       async () => {
+        const created = formModal.mode === "create";
         setFormModal(null);
         await matches.reload();
+        notify(created ? "Partido creado correctamente." : "Partido actualizado.");
       }
     );
   };
@@ -78,6 +82,7 @@ export default function AdminMatchesPage() {
       async () => {
         setResultModal(null);
         await matches.reload();
+        notify("Resultado cargado correctamente.");
       }
     );
   };
@@ -88,6 +93,7 @@ export default function AdminMatchesPage() {
       async () => {
         setConfirm(null);
         await matches.reload();
+        notify("Partido eliminado.");
       }
     );
   };

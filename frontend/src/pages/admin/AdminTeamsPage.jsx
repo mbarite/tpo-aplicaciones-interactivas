@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useAsync } from "../../hooks/useAsync";
 import { useMutation } from "../../hooks/useMutation";
+import { useToast } from "../../context/ToastContext";
 import {
   getTeams,
   createTeam,
@@ -23,6 +24,7 @@ export default function AdminTeamsPage() {
   const [modal, setModal] = useState(null); // { mode, team }
   const [confirm, setConfirm] = useState(null); // team a eliminar
   const [roster, setRoster] = useState(null); // team cuyo plantel se gestiona
+  const { notify } = useToast();
   const save = useMutation();
   const remove = useMutation();
 
@@ -43,8 +45,10 @@ export default function AdminTeamsPage() {
           ? createTeam(payload)
           : updateTeam(modal.team.id, payload),
       async () => {
+        const created = modal.mode === "create";
         setModal(null);
         await reload();
+        notify(created ? "Equipo creado correctamente." : "Equipo actualizado.");
       }
     );
   };
@@ -55,6 +59,7 @@ export default function AdminTeamsPage() {
       async () => {
         setConfirm(null);
         await reload();
+        notify("Equipo eliminado.");
       }
     );
   };

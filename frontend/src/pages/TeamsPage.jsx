@@ -1,15 +1,30 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { getTeams } from "../services/teamService";
 import TeamLogo from "../components/TeamLogo";
 
-import Loading from "../components/ui/Loading";
+import { SkeletonCards } from "../components/ui/Skeleton";
 import Alert from "../components/ui/Alert";
 import EmptyState from "../components/ui/EmptyState";
 
 export default function TeamsPage() {
+  useDocumentTitle("Equipos");
   const { data, loading, error } = useAsync(getTeams, []);
+  const [query, setQuery] = useState("");
+
+  const teams = useMemo(() => {
+    const list = data || [];
+    const q = query.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        (t.coachName || "").toLowerCase().includes(q)
+    );
+  }, [data, query]);
 
   return (
     <div className="container page">
@@ -18,19 +33,37 @@ export default function TeamsPage() {
         <p>Conoce a los clubes participantes. Toca un equipo para ver su plantel completo.</p>
       </header>
 
+      {!loading && !error && (data || []).length > 0 && (
+        <div className="search-bar">
+          <span className="search-bar__icon" aria-hidden="true">🔎</span>
+          <input
+            type="search"
+            className="search-bar__input"
+            placeholder="Buscar equipo o entrenador..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            aria-label="Buscar equipo"
+          />
+        </div>
+      )}
+
       {loading ? (
-        <Loading label="Cargando equipos..." />
+        <SkeletonCards count={8} />
       ) : error ? (
         <Alert type="error">{error}</Alert>
-      ) : data.length === 0 ? (
+      ) : teams.length === 0 ? (
         <EmptyState
           icon="👥"
-          title="Todavia no hay equipos"
-          message="Cuando se den de alta equipos apareceran en esta seccion."
+          title={query ? "Sin resultados" : "Todavia no hay equipos"}
+          message={
+            query
+              ? `No se encontraron equipos para "${query}".`
+              : "Cuando se den de alta equipos apareceran en esta seccion."
+          }
         />
       ) : (
-        <div className="grid grid--cards">
-          {data.map((team) => (
+        <div className="grid grid--cards fade-in">
+          {teams.map((team) => (
             <Link
               key={team.id}
               to={`/equipos/${team.id}`}

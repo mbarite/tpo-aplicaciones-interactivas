@@ -2,9 +2,41 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLeague } from "../context/LeagueContext";
 import { getTeam } from "../services/teamService";
 import { personInitials } from "../utils/text";
+
+// Calcula la "forma" (ultimos 5 partidos jugados) del equipo: G / E / P.
+function computeForm(teamId, playedMatches) {
+  return (playedMatches || [])
+    .slice(-5)
+    .map((m) => {
+      const isHome = m.homeTeam?.id === teamId;
+      const us = isHome ? m.result?.homeScore : m.result?.awayScore;
+      const them = isHome ? m.result?.awayScore : m.result?.homeScore;
+      if (us == null || them == null) return null;
+      if (us > them) return "G";
+      if (us < them) return "P";
+      return "E";
+    })
+    .filter(Boolean);
+}
+
+function FormDots({ form }) {
+  if (!form.length) return null;
+  const label = { G: "Ganado", E: "Empatado", P: "Perdido" };
+  return (
+    <div className="form-dots" title="Últimos partidos">
+      <span className="form-dots__label">Forma:</span>
+      {form.map((r, i) => (
+        <span key={i} className={`form-dot form-dot--${r}`} title={label[r]}>
+          {r}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 import TeamLogo from "../components/TeamLogo";
 import MatchCard from "../components/MatchCard";
@@ -58,6 +90,8 @@ export default function TeamDetailPage() {
     () => getTeam(teamId, seasonId, cat),
     [teamId, seasonId, cat]
   );
+
+  useDocumentTitle(data ? data.name : "Equipo");
 
   if (loading) {
     return (
@@ -114,6 +148,7 @@ export default function TeamDetailPage() {
 
       <section className="section">
         <h2 className="section-title">Estadisticas {cat && `· ${cat}`}</h2>
+        <FormDots form={computeForm(data.id, data.playedMatches)} />
         <StatGrid standings={data.standings} />
       </section>
 

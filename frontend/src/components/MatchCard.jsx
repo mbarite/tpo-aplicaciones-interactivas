@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import TeamLogo from "./TeamLogo";
 import { MatchStatusBadge } from "./ui/Badge";
 import { formatLongDate, formatTime } from "../utils/format";
+import { shortTeamName } from "../utils/text";
 
 // Tarjeta de partido reutilizada en partidos, vista de equipo y admin.
 // `actions` permite inyectar botones (ej. editar / cargar resultado) desde el admin.
@@ -20,31 +21,29 @@ export default function MatchCard({ match, actions, to }) {
         <MatchStatusBadge status={match.status} />
       </div>
 
-      <div className="match-card__teams">
-        <div className="match-team">
-          <TeamLogo team={match.homeTeam} size={48} round />
-          <span className="match-team__name">{match.homeTeam?.name ?? "Equipo"}</span>
-        </div>
-
-        <div className="match-card__score">
+      <div className="match-card__rows">
+        <div className={`match-row ${homeWin ? "match-row--win" : ""}`}>
+          <TeamLogo team={match.homeTeam} size={34} round />
+          <span className="match-row__name" title={match.homeTeam?.name}>
+            {shortTeamName(match.homeTeam?.name) || "Equipo"}
+          </span>
           {played && result ? (
-            <>
-              <span className={`score-num ${homeWin ? "score-num--win" : ""}`}>
-                {result.homeScore}
-              </span>
-              <span className="match-card__score-sep">:</span>
-              <span className={`score-num ${awayWin ? "score-num--win" : ""}`}>
-                {result.awayScore}
-              </span>
-            </>
+            <span className="match-row__score">{result.homeScore}</span>
           ) : (
-            <span className="match-card__vs">VS</span>
+            <span className="match-row__ha">L</span>
           )}
         </div>
 
-        <div className="match-team">
-          <TeamLogo team={match.awayTeam} size={48} round />
-          <span className="match-team__name">{match.awayTeam?.name ?? "Equipo"}</span>
+        <div className={`match-row ${awayWin ? "match-row--win" : ""}`}>
+          <TeamLogo team={match.awayTeam} size={34} round />
+          <span className="match-row__name" title={match.awayTeam?.name}>
+            {shortTeamName(match.awayTeam?.name) || "Equipo"}
+          </span>
+          {played && result ? (
+            <span className="match-row__score">{result.awayScore}</span>
+          ) : (
+            <span className="match-row__ha">V</span>
+          )}
         </div>
       </div>
 

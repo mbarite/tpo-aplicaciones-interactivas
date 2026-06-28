@@ -1,12 +1,14 @@
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLeague } from "../context/LeagueContext";
 import { getStandings } from "../services/standingService";
 import StandingsTable from "../components/StandingsTable";
-import Loading from "../components/ui/Loading";
+import { SkeletonRows } from "../components/ui/Skeleton";
 import Alert from "../components/ui/Alert";
 
 export default function StandingsPage() {
   const { seasonId, category } = useLeague();
+  useDocumentTitle(`Clasificación${category ? ` · ${category}` : ""}`);
   const { data, loading, error } = useAsync(
     () => getStandings(seasonId, category),
     [seasonId, category]
@@ -24,7 +26,7 @@ export default function StandingsPage() {
       </header>
 
       {loading ? (
-        <Loading label="Cargando clasificacion..." />
+        <SkeletonRows count={10} />
       ) : error ? (
         <Alert type="error">{error}</Alert>
       ) : (

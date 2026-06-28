@@ -1,26 +1,47 @@
 import { Link, useParams } from "react-router-dom";
 
 import { useAsync } from "../hooks/useAsync";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { getMatch } from "../services/matchService";
 import TeamLogo from "../components/TeamLogo";
-import { MatchStatusBadge } from "../components/ui/Badge";
+import Badge, { MatchStatusBadge } from "../components/ui/Badge";
 import Loading from "../components/ui/Loading";
 import Alert from "../components/ui/Alert";
 import { formatLongDate, formatTime } from "../utils/format";
 
-function Lineup({ team, side, played }) {
+function Lineup({ team, side, played, mvpId }) {
+  const total = (team.lineup || []).reduce((sum, p) => sum + (p.points || 0), 0);
+  // El goleador del equipo es el primero (la API ya ordena por puntos desc).
+  const topScorerId = played && team.lineup?.[0]?.points > 0 ? team.lineup[0].id : null;
+
   return (
     <div className="lineup">
       <div className="lineup__head">
         <span className="lineup__side">{side}</span>
         <h3 className="lineup__team">{team.name}</h3>
         {team.coachName && <span className="lineup__coach">DT: {team.coachName}</span>}
+        {played && <span className="lineup__total">Total: {total} pts</span>}
       </div>
       {team.lineup && team.lineup.length > 0 ? (
         <ul className="lineup__list">
           {team.lineup.map((player) => (
             <li key={player.id} className="lineup__row">
-              <span className="lineup__player">{player.fullName}</span>
+              <span className="lineup__player">
+                {player.id === topScorerId && (
+                  <span className="lineup__star" title="Goleador del equipo">⭐</span>
+                )}
+                {player.fullName}
+                {player.promoted && (
+                  <Badge variant="warning" style={{ marginLeft: 8 }}>
+                    ↑ {player.category}
+                  </Badge>
+                )}
+                {player.id === mvpId && (
+                  <Badge variant="primary" style={{ marginLeft: 8 }}>
+                    MVP
+                  </Badge>
+                )}
+              </span>
               {played && <span className="lineup__pts">{player.points} pts</span>}
             </li>
           ))}
@@ -35,6 +56,9 @@ function Lineup({ team, side, played }) {
 export default function MatchDetailPage() {
   const { matchId } = useParams();
   const { data: match, loading, error } = useAsync(() => getMatch(matchId), [matchId]);
+  useDocumentTitle(
+    match ? `${match.homeTeam?.name} vs ${match.awayTeam?.name}` : "Partido"
+  );
 
   if (loading) {
     return (
@@ -59,6 +83,17 @@ export default function MatchDetailPage() {
   const result = match.result;
   const homeWin = played && result && result.homeScore > result.awayScore;
   const awayWin = played && result && result.awayScore > result.homeScore;
+
+  // MVP del partido: el jugador con mas puntos entre ambos equipos.
+  const allPlayers = [
+    ...(match.homeTeam?.lineup || []),
+    ...(match.awayTeam?.lineup || [])
+  ];
+  const mvp =
+    played && allPlayers.length
+      ? allPlayers.reduce((a, b) => (b.points > a.points ? b : a))
+      : null;
+  const mvpId = mvp && mvp.points > 0 ? mvp.id : null;
 
   return (
     <div className="container page">
@@ -113,8 +148,8 @@ export default function MatchDetailPage() {
         Alineaciones
       </h2>
       <div className="lineups">
-        <Lineup team={match.homeTeam} side="Local" played={played} />
-        <Lineup team={match.awayTeam} side="Visitante" played={played} />
+        <Lineup team={match.homeTeam} side="Local" played={played} mvpId={mvpId} />
+        <Lineup team={match.awayTeam} side="Visitante" played={played} mvpId={mvpId} />
       </div>
     </div>
   );
