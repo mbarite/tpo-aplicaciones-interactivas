@@ -82,7 +82,7 @@ export default function LoginPage() {
         </form>
 
         <div className="login-hint">
-          Credenciales de prueba: <strong>admin</strong> / <strong>admin1234</strong>
+          Credenciales de prueba: <strong>admin</strong> / <strong>Admin1234</strong>
         </div>
 
         <Link to="/" className="back-home">

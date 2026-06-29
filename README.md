@@ -64,7 +64,7 @@ npm run dev          # sitio en http://localhost:3000
 
 | Usuario | Contrasena  |
 |---------|-------------|
-| `admin` | `admin1234` |
+| `admin` | `Admin1234` |
 
 > El administrador inicial se crea automaticamente al iniciar el backend, tomando los
 > valores `ADMIN_USERNAME` / `ADMIN_PASSWORD` del `.env`.

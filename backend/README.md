@@ -24,7 +24,7 @@ PORT=4000
 MONGO_URI=mongodb://127.0.0.1:27017/liga-baloncesto
 JWT_SECRET=un-secreto-seguro
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin1234
+ADMIN_PASSWORD=Admin1234
 ```
 
 ## Ejecucion
@@ -98,7 +98,7 @@ Content-Type: application/json
 
 {
   "username": "admin",
-  "password": "admin1234"
+  "password": "Admin1234"
 }
 ```
 

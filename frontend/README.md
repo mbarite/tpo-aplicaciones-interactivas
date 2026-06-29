@@ -42,7 +42,7 @@ npm run preview  # sirve el build de produccion
 ```
 
 > El sitio publico no requiere login. Para el panel de administracion usar las
-> credenciales que entrega el grupo. En el entorno de prueba: **admin / admin1234**.
+> credenciales que entrega el grupo. En el entorno de prueba: **admin / Admin1234**.
 
 ## Estructura del proyecto
 

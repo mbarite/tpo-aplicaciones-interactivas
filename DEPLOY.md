@@ -1,108 +1,146 @@
-# Guía para publicar la app en internet (gratis)
+# Guia para publicar la app en internet
 
-La app tiene 3 piezas. Cada una se publica en un servicio gratuito:
+La entrega online usa tres piezas:
 
-| Pieza | Qué es | Servicio |
-|-------|--------|----------|
-| Base de datos | Donde se guardan equipos, partidos, etc. | **MongoDB Atlas** |
-| Backend (API) | El servidor que maneja los datos | **Render** |
-| Frontend (sitio) | La página que se ve | **Vercel** |
+| Pieza | Que es | Servicio usado |
+|-------|--------|----------------|
+| Base de datos | Guarda equipos, jugadores, partidos y resultados | MongoDB Atlas |
+| Backend (API) | Servidor Node/Express que expone `/api` | Render Web Service |
+| Frontend (sitio) | Aplicacion React/Vite que ve el usuario | Render Static Site |
 
-> Hacelo en este orden: 1) Atlas → 2) Render → 3) Vercel. Cada paso te da un dato
-> que necesitás para el siguiente.
+URLs de produccion actuales:
 
----
+| Servicio | URL |
+|----------|-----|
+| Frontend | `https://tpo-aplicaciones-interactivas-1-ctwa.onrender.com` |
+| Backend | `https://tpo-aplicaciones-interactivas-w5d4.onrender.com` |
+| Healthcheck API | `https://tpo-aplicaciones-interactivas-w5d4.onrender.com/api/health` |
 
-## Paso 1 — Base de datos (MongoDB Atlas)
+Credenciales de demo:
 
-1. Entrá a **https://www.mongodb.com/cloud/atlas/register** y creá una cuenta gratis.
-2. Creá un clúster **gratuito** (opción **M0 / Free**).
-3. En **Database Access**: creá un usuario y contraseña (anotalos).
-4. En **Network Access**: agregá la IP `0.0.0.0/0` (permite el acceso desde cualquier lado).
-5. En **Database → Connect → Drivers**: copiá la **cadena de conexión**. Se ve así:
-   ```
-   mongodb+srv://USUARIO:CONTRASEÑA@cluster0.xxxxx.mongodb.net/liga-baloncesto
-   ```
-   Reemplazá `USUARIO` y `CONTRASEÑA` por los del paso 3. **Guardá ese texto**, es tu `MONGO_URI`.
+| Usuario | Contrasena |
+|---------|------------|
+| `admin` | `Admin1234` |
 
----
-
-## Paso 2 — Backend (Render)
-
-1. Entrá a **https://render.com** y registrate con tu cuenta de **GitHub**.
-2. **New → Web Service** y elegí el repo `tpo-aplicaciones-interactivas`.
-3. Completá:
-   - **Root Directory:** `backend`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Instance Type:** Free
-4. En **Environment** agregá estas variables:
-
-   | Key | Value |
-   |-----|-------|
-   | `MONGO_URI` | (la cadena del Paso 1) |
-   | `JWT_SECRET` | cualquier-texto-secreto-largo |
-   | `ADMIN_USERNAME` | `admin` |
-   | `ADMIN_PASSWORD` | (la contraseña de admin que quieras) |
-
-5. **Create Web Service**. Cuando termine, Render te da una URL tipo:
-   `https://liga-baloncesto-api.onrender.com` → **guardala**.
-6. Probá que anda: abrí esa URL + `/api/health` en el navegador. Debe decir
-   `"API de liga de baloncesto operativa"`.
-
-> Nota: el plan gratis de Render "se duerme" si nadie lo usa por un rato. La primera
-> carga después de dormir tarda ~40 segundos. Abrí el link 1 minuto antes de mostrarlo.
+> Nota: Render Free puede dormir los servicios por inactividad. Para una demo, abrir el frontend y el healthcheck de la API unos minutos antes.
 
 ---
 
-## Paso 3 — Frontend (Vercel)
+## Paso 1 - Base de datos (MongoDB Atlas)
 
-1. Entrá a **https://vercel.com** y registrate con **GitHub**.
-2. **Add New → Project** y elegí el repo `tpo-aplicaciones-interactivas`.
-3. Completá:
-   - **Root Directory:** `frontend`
-   - (Framework: Vite, lo detecta solo)
-4. En **Environment Variables** agregá:
+1. Crear un cluster gratuito en MongoDB Atlas.
+2. Crear un usuario de base de datos.
+3. En Network Access, permitir acceso desde Render. Para esta demo se uso `0.0.0.0/0`.
+4. Copiar la cadena de conexion desde Connect -> Drivers.
+5. Usar una base llamada `liga-baloncesto`.
 
-   | Key | Value |
-   |-----|-------|
-   | `VITE_API_BASE_URL` | `https://TU-BACKEND.onrender.com/api` |
+Ejemplo de forma de `MONGO_URI`:
 
-   (usá la URL del Paso 2 y agregale `/api` al final)
-5. **Deploy**. Al terminar te da la URL pública, tipo `https://tu-liga.vercel.app`.
-   **¡Esa es la dirección que abrís desde cualquier PC o celular!**
+```env
+MONGO_URI=mongodb+srv://USUARIO:CONTRASENA@cluster.mongodb.net/liga-baloncesto?appName=tpo-liga&authSource=admin
+```
 
----
-
-## Paso 4 — Cargar los datos de demo en la base
-
-Recién creada, la base está vacía. Para llenarla con la liga de ejemplo
-(12 equipos, 180 jugadores, 3 temporadas y 3 categorías) corré el seed **desde tu PC
-apuntando a la base de Atlas** (no hace falta tocar Render):
-
-1. En la carpeta `backend`, creá un archivo `.env` (copiá `backend/.env.example`) y poné
-   en `MONGO_URI` la **misma cadena de Atlas** del Paso 1.
-2. Desde `backend` ejecutá:
-   ```bash
-   npm install
-   npm run seed:reset-demo
-   ```
-   Eso **borra y recarga** todos los datos de demo en la base de Atlas. Al terminar,
-   tu compañero (o cualquiera) ya ve la liga completa abriendo la URL de Vercel.
-
-> `seed:reset-demo` reinicia todo. Si solo querés **agregar/actualizar** sin borrar lo
-> existente, usá `npm run seed:demo`.
+No subir el `MONGO_URI` real al repositorio.
 
 ---
 
-## Después de publicar
+## Paso 2 - Backend en Render (Web Service)
 
-- Entrá a tu sitio de Vercel, tocá **Admin** e ingresá con el usuario/contraseña que
-  pusiste en Render. Cargá un par de equipos y partidos para que se vea con datos.
-- Si cambiás una variable de entorno, volvé a hacer **Deploy / Redeploy** para que tome
-  el cambio.
+Crear un servicio de tipo **Web Service** conectado al repo de GitHub.
 
-## Credenciales para la entrega
+Configuracion:
 
-- Usuario y contraseña de admin: los que definiste en las variables de Render
-  (`ADMIN_USERNAME` / `ADMIN_PASSWORD`).
+```text
+Root Directory: backend
+Runtime: Node
+Build Command: npm install
+Start Command: npm start
+Instance Type: Free
+```
+
+Variables de entorno:
+
+| Key | Value |
+|-----|-------|
+| `MONGO_URI` | URI de Atlas |
+| `JWT_SECRET` | texto secreto largo |
+| `ADMIN_USERNAME` | `admin` |
+| `ADMIN_PASSWORD` | `Admin1234` |
+| `DNS_SERVERS` | `8.8.8.8,1.1.1.1` |
+
+Verificacion:
+
+```text
+https://tpo-aplicaciones-interactivas-w5d4.onrender.com/api/health
+```
+
+Respuesta esperada:
+
+```json
+{
+  "ok": true,
+  "message": "API de liga de baloncesto operativa"
+}
+```
+
+---
+
+## Paso 3 - Frontend en Render (Static Site)
+
+Crear un servicio de tipo **Static Site** conectado al mismo repo.
+
+Configuracion:
+
+```text
+Root Directory: frontend
+Build Command: npm install && npm run build
+Publish Directory: dist
+```
+
+Variable de entorno:
+
+| Key | Value |
+|-----|-------|
+| `VITE_API_BASE_URL` | `https://tpo-aplicaciones-interactivas-w5d4.onrender.com/api` |
+
+Verificacion:
+
+```text
+https://tpo-aplicaciones-interactivas-1-ctwa.onrender.com
+```
+
+Si se usan rutas internas de React Router, el Static Site debe servir `index.html` para las rutas del frontend.
+
+---
+
+## Paso 4 - Cargar datos de demo en Atlas
+
+Desde la PC local, con `backend/.env` apuntando al `MONGO_URI` de Atlas:
+
+```bash
+cd backend
+npm install
+npm run seed:reset-demo
+```
+
+El seed deja cargada una demo con:
+
+- 12 equipos
+- 378 jugadores
+- 3 temporadas
+- 3 categorias
+- 108 partidos jugados
+- 90 partidos programados
+
+`seed:reset-demo` borra y recarga la base demo. Usarlo con cuidado.
+
+---
+
+## Checklist rapido antes de presentar
+
+1. Abrir el frontend publico.
+2. Abrir el healthcheck del backend.
+3. Entrar a Admin con `admin / Admin1234`.
+4. Mostrar clasificacion, partidos, equipos y detalle de equipo.
+5. Desde Admin, crear o editar un dato pequeno y verificar que impacta en la vista publica.
+6. Si se hicieron pruebas que ensucian la base, volver a correr `npm run seed:reset-demo`.
