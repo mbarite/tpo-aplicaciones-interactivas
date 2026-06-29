@@ -8,5 +8,9 @@ module.exports = {
   mongoUri: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/liga-baloncesto",
   jwtSecret: process.env.JWT_SECRET || "cambiar-por-un-secreto-seguro",
   adminUsername: process.env.ADMIN_USERNAME || "admin",
-  adminPassword: process.env.ADMIN_PASSWORD || "admin1234"
+  adminPassword: process.env.ADMIN_PASSWORD || "admin1234",
+  dnsServers: (process.env.DNS_SERVERS || "")
+    .split(",")
+    .map((server) => server.trim())
+    .filter(Boolean)
 };
