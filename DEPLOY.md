@@ -34,13 +34,13 @@ Credenciales de demo:
 4. Copiar la cadena de conexion desde Connect -> Drivers.
 5. Usar una base llamada `liga-baloncesto`.
 
-Ejemplo de forma de `MONGO_URI`:
+El `MONGO_URI` se copia desde Atlas y se guarda solo como variable de entorno local o de Render. No escribir en el repositorio ninguna URI que tenga usuario y contrasena.
 
-```env
-MONGO_URI=mongodb+srv://USUARIO:CONTRASENA@cluster.mongodb.net/liga-baloncesto?appName=tpo-liga&authSource=admin
+Forma esperada, sin credenciales:
+
+```text
+protocolo + host de Atlas + base liga-baloncesto + parametros de conexion
 ```
-
-No subir el `MONGO_URI` real al repositorio.
 
 ---
 
